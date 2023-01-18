@@ -55,7 +55,7 @@ connectionDetails <- DatabaseConnector::createConnectionDetails(
 storeConnectionDetails(connectionDetails = connectionDetails,
                        connectionDetailsReference = connectionDetailsReference)
 
-executionSettings <- createCdmExecutionSettings(
+executionSettings <- createExecutionSettings(
   connectionDetailsReference = connectionDetailsReference,
   workDatabaseSchema = workDatabaseSchema,
   cdmDatabaseSchema = cdmDatabaseSchema,
