@@ -1,7 +1,10 @@
-library(Strategus) # remotes::install_github('ohdsi/Strategus')
-library(PatientLevelPrediction) # remotes::install_github('ohdsi/PatientLevelPrediction')
-library(DeepPatientLevelPrediction) # remotes::install_github('ohdsi/DeepPatientLevelPrediction')
-library(dplyr)
+
+rstudioapi::restartSession()
+if (!require("remotes")) install.packages("remotes"); library(remotes)
+if (!require("dplyr")) install.packages("dplyr"); library(dplyr)
+if (!require("Strategus")) remotes::install_github('ohdsi/Strategus', upgrade = "never"); library(Strategus)
+if (!require("PatientLevelPrediction")) remotes::install_github('ohdsi/PatientLevelPrediction', upgrade = "never"); library(PatientLevelPrediction)
+if (!require("DeepPatientLevelPrediction")) remotes::install_github('ohdsi/DeepPatientLevelPrediction', ref = "develop", upgrade = "never"); library(DeepPatientLevelPrediction)
 
 ################################################################################
 # COHORTS ######################################################################
@@ -60,7 +63,7 @@ covariateSettings <- FeatureExtraction::createCovariateSettings(
   useDemographicsGender = T,
   useDemographicsAge = T,
   useConditionOccurrenceLongTerm  = T,
-  useDrugExposureLongTerm = T,
+  useDrugEraLongTerm = T,
   useCharlsonIndex = T,
   longTermStartDays = -365,
   endDays = 0
@@ -68,7 +71,6 @@ covariateSettings <- FeatureExtraction::createCovariateSettings(
 
 restrictPlpDataSettings <- createRestrictPlpDataSettings(
   sampleSize = 1e6,
-  washoutPeriod = -365
 )
 
 splitSettings <- createDefaultSplitSetting(
@@ -177,7 +179,7 @@ transformerModelSettings <- setTransformer(
   numBlocks = 1:4,
   dimToken = 2^(6:9),
   dimOut = 1,
-  numHeads = 1:8,
+  numHeads = c(1, 2, 4, 8),
   attDropout = seq(0, 5e-1, 5e-2),
   ffnDropout = seq(0, 5e-1, 5e-2),
   resDropout = seq(0, 5e-1, 5e-2),
@@ -196,19 +198,21 @@ modelSettings <- list(
   gradientBoostingModelSettings,
   multiLayerPerceptronModelSettings,
   resNetModelSettings,
-  transformerModelSettings)
+  transformerModelSettings
+)
 
 ################################################################################
 # MODEL DESIGNS ################################################################
 ################################################################################
 
 modelDesignList <- list()
+class(modelDesignList) <- 'leGrandeDesignListOfList'
 
 # lung cancer
 for (modelSetting in modelSettings) {
-  append(
+  modelDesignList <- append(
     modelDesignList,
-    PatientLevelPrediction::createModelDesign(
+    list(PatientLevelPrediction::createModelDesign(
       targetId = cohortIds$lungCancer$target,
       outcomeId = cohortIds$lungCancer$outcome,
       restrictPlpDataSettings = restrictPlpDataSettings,
@@ -219,16 +223,16 @@ for (modelSetting in modelSettings) {
       preprocessSettings = preprocessSettings,
       modelSettings = modelSetting,
       splitSettings = splitSettings,
-      runCovariateSummary = T
+      runCovariateSummary = T)
     )
   )
 }
 
 # MDD bipolar 1-year
 for (modelSetting in modelSettings) {
-  append(
+  modelDesignList <- append(
     modelDesignList,
-    PatientLevelPrediction::createModelDesign(
+    list(PatientLevelPrediction::createModelDesign(
       targetId = cohortIds$bipolar$target,
       outcomeId = cohortIds$bipolar$outcome,
       restrictPlpDataSettings = restrictPlpDataSettings,
@@ -239,16 +243,16 @@ for (modelSetting in modelSettings) {
       preprocessSettings = preprocessSettings,
       modelSettings = modelSetting,
       splitSettings = splitSettings,
-      runCovariateSummary = T
+      runCovariateSummary = T)
     )
   )
 }
 
 # dementia 5-year
 for (modelSetting in modelSettings) {
-  append(
+  modelDesignList <- append(
     modelDesignList,
-    PatientLevelPrediction::createModelDesign(
+    list(PatientLevelPrediction::createModelDesign(
       targetId = cohortIds$dementia$target,
       outcomeId = cohortIds$dementia$outcome,
       restrictPlpDataSettings = restrictPlpDataSettings,
@@ -259,7 +263,7 @@ for (modelSetting in modelSettings) {
       preprocessSettings = preprocessSettings,
       modelSettings = modelSetting,
       splitSettings = splitSettings,
-      runCovariateSummary = T
+      runCovariateSummary = T)
     )
   )
 }
