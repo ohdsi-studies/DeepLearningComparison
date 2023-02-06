@@ -1,7 +1,18 @@
-library(Strategus) # remotes::install_github('ohdsi/Strategus')
-library(PatientLevelPrediction) # remotes::install_github('ohdsi/PatientLevelPrediction')
-library(DeepPatientLevelPrediction) # remotes::install_github('ohdsi/DeepPatientLevelPrediction')
-library(dplyr)
+
+rstudioapi::restartSession()
+if (!require("remotes")) install.packages("remotes"); library(remotes)
+if (!require("dplyr")) install.packages("dplyr"); library(dplyr)
+if (!require("Strategus")) remotes::install_github('ohdsi/Strategus', upgrade = "never"); library(Strategus)
+if (!require("PatientLevelPrediction")) remotes::install_github('ohdsi/PatientLevelPrediction', upgrade = "never"); library(PatientLevelPrediction)
+if (!require("DeepPatientLevelPrediction")) remotes::install_github('ohdsi/DeepPatientLevelPrediction', ref = "develop", upgrade = "never"); library(DeepPatientLevelPrediction)
+
+################################################################################
+# COHORTS ######################################################################
+################################################################################
+
+cohortIds <- list(dementia = list(target = 9938, outcome = 6243),
+                  lungCancer = list(target = 11453, outcome = 298),
+                  bipolar = list(target = 10460, outcome = 10461))
 
 # EXTRACTING COHORTS
 baseUrl <- keyring::key_get('webapi', 'baseurl')
@@ -11,9 +22,10 @@ ROhdsiWebApi::authorizeWebApi(
   webApiUsername = keyring::key_get('webapi', 'username'),
   webApiPassword = keyring::key_get('webapi', 'password')
 )
+
 cohortDefinitions <- ROhdsiWebApi::exportCohortDefinitionSet(
   baseUrl = baseUrl,
-  cohortIds = c(301, 298, 10460, 10461, 9938, 6243),
+  cohortIds = unlist(cohortIds),
   generateStats = F
 )
 # modify the cohort
@@ -43,228 +55,218 @@ cohortGeneratorModuleSpecifications <- createCohortGeneratorModuleSpecifications
   generateStats = F
 )
 
+################################################################################
+# UNIVERSAL ANALYSIS SETTINGS ##################################################
+################################################################################
 
-# PREDICTION SETTINGS
 covariateSettings <- FeatureExtraction::createCovariateSettings(
   useDemographicsGender = T,
-  useDemographicsAgeGroup = T, #PLP age group
-  useConditionGroupEraLongTerm  = T,
-  useDrugGroupEraLongTerm = T,
+  useDemographicsAge = T,
+  useConditionOccurrenceLongTerm  = T,
+  useDrugEraLongTerm = T,
+  useCharlsonIndex = T,
+  longTermStartDays = -365,
+  endDays = 0
 )
 
-modelDesignList <- list()
-length(modelDesignList) <- 9
+restrictPlpDataSettings <- createRestrictPlpDataSettings(
+  sampleSize = 1e6,
+)
+
+splitSettings <- createDefaultSplitSetting(
+  testFraction = .25,
+  trainFraction = .75,
+  nfold = 3,
+  splitSeed = 1e3,
+  type = 'stratified'
+)
+
+preprocessSettings <- createPreprocessSettings(
+  minFraction = 1e-3,
+  normalize = TRUE,
+  removeRedundancy = TRUE
+)
+################################################################################
+# POPULATION SETTINGS ##########################################################
+################################################################################
 
 # lung cancer
-modelDesignList[[1]] <- PatientLevelPrediction::createModelDesign(
-  targetId = 301,
-  outcomeId = 289,
-  restrictPlpDataSettings = createRestrictPlpDataSettings(),
-  populationSettings = createStudyPopulationSettings(
-    removeSubjectsWithPriorOutcome = T,
-    priorOutcomeLookback = 99999,
-    requireTimeAtRisk = T,
-    minTimeAtRisk = 1,
-    riskWindowStart = 1,
-    startAnchor = 'cohort start',
-    riskWindowEnd = 365*3,
-    endAnchor = 'cohort start'
-  ),
-  covariateSettings = covariateSettings,
-  featureEngineeringSettings = NULL,
-  sampleSettings = NULL,
-  preprocessSettings = createPreprocessSettings(),
-  modelSettings = DeepPatientLevelPrediction::setDefaultTransformer(),
-  splitSettings = createDefaultSplitSetting(),
-  runCovariateSummary = T
+lungCancerPopulationSettings <- createStudyPopulationSettings(
+  removeSubjectsWithPriorOutcome = T,
+  priorOutcomeLookback = 99999,
+  requireTimeAtRisk = T,
+  minTimeAtRisk = 1,
+  riskWindowStart = 1,
+  startAnchor = 'cohort start',
+  riskWindowEnd = 1095,
+  endAnchor = 'cohort start'
 )
 
-modelDesignList[[2]] <- PatientLevelPrediction::createModelDesign(
-  targetId = 301,
-  outcomeId = 289,
-  restrictPlpDataSettings = createRestrictPlpDataSettings(),
-  populationSettings = createStudyPopulationSettings(
-    removeSubjectsWithPriorOutcome = T,
-    priorOutcomeLookback = 99999,
-    requireTimeAtRisk = T,
-    minTimeAtRisk = 1,
-    riskWindowStart = 1,
-    startAnchor = 'cohort start',
-    riskWindowEnd = 365*3,
-    endAnchor = 'cohort start'
-  ),
-  covariateSettings = covariateSettings,
-  featureEngineeringSettings = NULL,
-  sampleSettings = NULL,
-  preprocessSettings = createPreprocessSettings(),
-  modelSettings = DeepPatientLevelPrediction::setDefaultResNet(),
-  splitSettings = createDefaultSplitSetting(),
-  runCovariateSummary = T
+# dementia
+dementiaPopulationSettings <- createStudyPopulationSettings(
+  binary = T, 
+  includeAllOutcomes = T, 
+  firstExposureOnly = T, 
+  washoutPeriod = 365, 
+  removeSubjectsWithPriorOutcome = F, 
+  priorOutcomeLookback = 99999, 
+  requireTimeAtRisk = T, 
+  minTimeAtRisk = 1, 
+  riskWindowStart = 1, 
+  startAnchor = 'cohort start', 
+  endAnchor = 'cohort start', 
+  riskWindowEnd = 1825
 )
 
-modelDesignList[[3]] <- PatientLevelPrediction::createModelDesign(
-  targetId = 301,
-  outcomeId = 289,
-  restrictPlpDataSettings = createRestrictPlpDataSettings(),
-  populationSettings = createStudyPopulationSettings(
-    removeSubjectsWithPriorOutcome = T,
-    priorOutcomeLookback = 99999,
-    requireTimeAtRisk = T,
-    minTimeAtRisk = 1,
-    riskWindowStart = 1,
-    startAnchor = 'cohort start',
-    riskWindowEnd = 365*3,
-    endAnchor = 'cohort start'
-  ),
-  covariateSettings = covariateSettings,
-  featureEngineeringSettings = NULL,
-  sampleSettings = NULL,
-  preprocessSettings = createPreprocessSettings(),
-  modelSettings = PatientLevelPrediction::setLassoLogisticRegression(),
-  splitSettings = createDefaultSplitSetting(),
-  runCovariateSummary = T
+# bipolar
+bipolarPopulationSettings <- createStudyPopulationSettings(
+  removeSubjectsWithPriorOutcome = T,
+  priorOutcomeLookback = 99999,
+  requireTimeAtRisk = T,
+  minTimeAtRisk = 1,
+  riskWindowStart = 1,
+  startAnchor = 'cohort start',
+  riskWindowEnd = 365,
+  endAnchor = 'cohort start'
 )
+
+################################################################################
+# MODEL SETTINGS ###############################################################
+################################################################################
+
+logisticRegressionModelSettings <- setLassoLogisticRegression(
+  seed = 1e3
+)
+
+gradientBoostingModelSettings <- setGradientBoostingMachine(
+  seed = 1e3
+)
+
+multiLayerPerceptronModelSettings <- setMultiLayerPerceptron(
+  seed = 1e3,
+  sizeEmbedding = 2^(6:9),
+  numLayers = 1:8,
+  sizeHidden = 2^(6:10),
+  dropout = seq(0, 5e-1, 5e-2),
+  weightDecay = c(1e-6, 1e-3),
+  learningRate = c(1e-2, 3e-4, 1e-5),
+  device = 'cuda:0',
+  hyperParamSearch = 'random',
+  randomSample = 1e2,
+  batchSize = 2^10,
+  epochs = 50
+)
+
+resNetModelSettings <- setResNet(
+  seed = 1e3,
+  sizeEmbedding = 2^(6:9),
+  numLayers = 1:8,
+  sizeHidden = 2^(6:10),
+  hiddenFactor = 1:4,
+  hiddenDropout = seq(0, 5e-1, 5e-2),
+  residualDropout = seq(0, 5e-1, 5e-2),
+  weightDecay = c(1e-6, 1e-3),
+  learningRate = c(1e-2, 3e-4, 1e-5),
+  device = "cuda:0",
+  hyperParamSearch = 'random',
+  randomSample = 1e2,
+  batchSize = 2^10,
+  epochs = 50
+)
+
+transformerModelSettings <- setTransformer(
+  seed = 1e3,
+  numBlocks = 1:4,
+  dimToken = 2^(6:9),
+  dimOut = 1,
+  numHeads = c(1, 2, 4, 8),
+  attDropout = seq(0, 5e-1, 5e-2),
+  ffnDropout = seq(0, 5e-1, 5e-2),
+  resDropout = seq(0, 5e-1, 5e-2),
+  dimHidden = 2^(6:10),
+  weightDecay = c(1e-6, 1e-3),
+  learningRate = c(1e-2, 3e-4, 1e-5),
+  batchSize = 2^10,
+  epochs = 50,
+  device = 'cuda:0',
+  hyperParamSearch = 'random',
+  randomSample = 1e2
+)
+
+modelSettings <- list(
+  logisticRegressionModelSettings,
+  gradientBoostingModelSettings,
+  multiLayerPerceptronModelSettings,
+  resNetModelSettings,
+  transformerModelSettings
+)
+
+################################################################################
+# MODEL DESIGNS ################################################################
+################################################################################
+
+modelDesignList <- list()
+class(modelDesignList) <- 'leGrandeDesignListOfList'
+
+# lung cancer
+for (modelSetting in modelSettings) {
+  modelDesignList <- append(
+    modelDesignList,
+    list(PatientLevelPrediction::createModelDesign(
+      targetId = cohortIds$lungCancer$target,
+      outcomeId = cohortIds$lungCancer$outcome,
+      restrictPlpDataSettings = restrictPlpDataSettings,
+      populationSettings = lungCancerPopulationSettings,
+      covariateSettings = covariateSettings,
+      featureEngineeringSettings = NULL,
+      sampleSettings = NULL,
+      preprocessSettings = preprocessSettings,
+      modelSettings = modelSetting,
+      splitSettings = splitSettings,
+      runCovariateSummary = T)
+    )
+  )
+}
 
 # MDD bipolar 1-year
-modelDesignList[[4]] <- PatientLevelPrediction::createModelDesign(
-  targetId = 10460,
-  outcomeId = 10461,
-  restrictPlpDataSettings = createRestrictPlpDataSettings(),
-  populationSettings = createStudyPopulationSettings(
-    removeSubjectsWithPriorOutcome = T,
-    priorOutcomeLookback = 99999,
-    requireTimeAtRisk = T,
-    minTimeAtRisk = 1,
-    riskWindowStart = 1,
-    startAnchor = 'cohort start',
-    riskWindowEnd = 1*365,
-    endAnchor = 'cohort start'
-  ),
-  covariateSettings = covariateSettings,
-  featureEngineeringSettings = NULL,
-  sampleSettings = NULL,
-  preprocessSettings = createPreprocessSettings(),
-  modelSettings = DeepPatientLevelPrediction::setDefaultTransformer(),
-  splitSettings = createDefaultSplitSetting(),
-  runCovariateSummary = T
-)
-
-modelDesignList[[5]] <- PatientLevelPrediction::createModelDesign(
-  targetId = 10460,
-  outcomeId = 10461,
-  restrictPlpDataSettings = createRestrictPlpDataSettings(),
-  populationSettings = createStudyPopulationSettings(
-    removeSubjectsWithPriorOutcome = T,
-    priorOutcomeLookback = 99999,
-    requireTimeAtRisk = T,
-    minTimeAtRisk = 1,
-    riskWindowStart = 1,
-    startAnchor = 'cohort start',
-    riskWindowEnd = 365*1,
-    endAnchor = 'cohort start'
-  ),
-  covariateSettings = covariateSettings,
-  featureEngineeringSettings = NULL,
-  sampleSettings = NULL,
-  preprocessSettings = createPreprocessSettings(),
-  modelSettings = DeepPatientLevelPrediction::setDefaultResNet(),
-  splitSettings = createDefaultSplitSetting(),
-  runCovariateSummary = T
-)
-
-modelDesignList[[6]] <- PatientLevelPrediction::createModelDesign(
-  targetId = 10460,
-  outcomeId = 10461,
-  restrictPlpDataSettings = createRestrictPlpDataSettings(),
-  populationSettings = createStudyPopulationSettings(
-    removeSubjectsWithPriorOutcome = T,
-    priorOutcomeLookback = 99999,
-    requireTimeAtRisk = T,
-    minTimeAtRisk = 1,
-    riskWindowStart = 1,
-    startAnchor = 'cohort start',
-    riskWindowEnd = 365*1,
-    endAnchor = 'cohort start'
-  ),
-  covariateSettings = covariateSettings,
-  featureEngineeringSettings = NULL,
-  sampleSettings = NULL,
-  preprocessSettings = createPreprocessSettings(),
-  modelSettings = PatientLevelPrediction::setLassoLogisticRegression(),
-  splitSettings = createDefaultSplitSetting(),
-  runCovariateSummary = T
-)
-
+for (modelSetting in modelSettings) {
+  modelDesignList <- append(
+    modelDesignList,
+    list(PatientLevelPrediction::createModelDesign(
+      targetId = cohortIds$bipolar$target,
+      outcomeId = cohortIds$bipolar$outcome,
+      restrictPlpDataSettings = restrictPlpDataSettings,
+      populationSettings = bipolarPopulationSettings,
+      covariateSettings = covariateSettings,
+      featureEngineeringSettings = NULL,
+      sampleSettings = NULL,
+      preprocessSettings = preprocessSettings,
+      modelSettings = modelSetting,
+      splitSettings = splitSettings,
+      runCovariateSummary = T)
+    )
+  )
+}
 
 # dementia 5-year
-modelDesignList[[7]] <- PatientLevelPrediction::createModelDesign(
-  targetId = 9938, 
-  outcomeId = 6243,
-  restrictPlpDataSettings = createRestrictPlpDataSettings(),
-  populationSettings = createStudyPopulationSettings(
-    removeSubjectsWithPriorOutcome = T,
-    priorOutcomeLookback = 99999,
-    requireTimeAtRisk = T,
-    minTimeAtRisk = 1,
-    riskWindowStart = 1,
-    startAnchor = 'cohort start',
-    riskWindowEnd = 5*365,
-    endAnchor = 'cohort start'
-  ),
-  covariateSettings = covariateSettings,
-  featureEngineeringSettings = NULL,
-  sampleSettings = NULL,
-  preprocessSettings = createPreprocessSettings(),
-  modelSettings = DeepPatientLevelPrediction::setDefaultTransformer(),
-  splitSettings = createDefaultSplitSetting(),
-  runCovariateSummary = T
-)
-
-modelDesignList[[8]] <- PatientLevelPrediction::createModelDesign(
-  targetId = 9938, 
-  outcomeId = 6243,
-  restrictPlpDataSettings = createRestrictPlpDataSettings(),
-  populationSettings = createStudyPopulationSettings(
-    removeSubjectsWithPriorOutcome = T,
-    priorOutcomeLookback = 99999,
-    requireTimeAtRisk = T,
-    minTimeAtRisk = 1,
-    riskWindowStart = 1,
-    startAnchor = 'cohort start',
-    riskWindowEnd = 365*5,
-    endAnchor = 'cohort start'
-  ),
-  covariateSettings = covariateSettings,
-  featureEngineeringSettings = NULL,
-  sampleSettings = NULL,
-  preprocessSettings = createPreprocessSettings(),
-  modelSettings = DeepPatientLevelPrediction::setDefaultResNet(),
-  splitSettings = createDefaultSplitSetting(),
-  runCovariateSummary = T
-)
-
-modelDesignList[[9]] <- PatientLevelPrediction::createModelDesign(
-  targetId = 9938, 
-  outcomeId = 6243,
-  restrictPlpDataSettings = createRestrictPlpDataSettings(),
-  populationSettings = createStudyPopulationSettings(
-    removeSubjectsWithPriorOutcome = T,
-    priorOutcomeLookback = 99999,
-    requireTimeAtRisk = T,
-    minTimeAtRisk = 1,
-    riskWindowStart = 1,
-    startAnchor = 'cohort start',
-    riskWindowEnd = 365*5,
-    endAnchor = 'cohort start'
-  ),
-  covariateSettings = covariateSettings,
-  featureEngineeringSettings = NULL,
-  sampleSettings = NULL,
-  preprocessSettings = createPreprocessSettings(),
-  modelSettings = PatientLevelPrediction::setLassoLogisticRegression(),
-  splitSettings = createDefaultSplitSetting(),
-  runCovariateSummary = T
-)
+for (modelSetting in modelSettings) {
+  modelDesignList <- append(
+    modelDesignList,
+    list(PatientLevelPrediction::createModelDesign(
+      targetId = cohortIds$dementia$target,
+      outcomeId = cohortIds$dementia$outcome,
+      restrictPlpDataSettings = restrictPlpDataSettings,
+      populationSettings = dementiaPopulationSettings,
+      covariateSettings = covariateSettings,
+      featureEngineeringSettings = NULL,
+      sampleSettings = NULL,
+      preprocessSettings = preprocessSettings,
+      modelSettings = modelSetting,
+      splitSettings = splitSettings,
+      runCovariateSummary = T)
+    )
+  )
+}
 
 # source the latest PatientLevelPredictionModule SettingsFunctions.R
 source("https://raw.githubusercontent.com/OHDSI/DeepPatientLevelPredictionModule/v0.0.1/SettingsFunctions.R")
