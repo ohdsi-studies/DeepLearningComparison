@@ -77,7 +77,7 @@ splitSettings <- createDefaultSplitSetting(
   testFraction = .25,
   trainFraction = .75,
   nfold = 3,
-  splitSeed = 1e3,
+  splitSeed = 123,
   type = 'stratified'
 )
 
