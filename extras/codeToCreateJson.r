@@ -153,6 +153,7 @@ multiLayerPerceptronModelSettings <- setMultiLayerPerceptron(
   device = 'cuda:0',
   hyperParamSearch = 'random',
   randomSample = 1e2,
+  randomSampleSeed = 123,
   batchSize = 2^10,
   epochs = 50
 )
@@ -170,6 +171,7 @@ resNetModelSettings <- setResNet(
   device = "cuda:0",
   hyperParamSearch = 'random',
   randomSample = 1e2,
+  randomSampleSeed = 123,
   batchSize = 2^10,
   epochs = 50
 )
@@ -190,7 +192,8 @@ transformerModelSettings <- setTransformer(
   epochs = 50,
   device = 'cuda:0',
   hyperParamSearch = 'random',
-  randomSample = 1e2
+  randomSample = 1e2,
+  randomSampleSeed = 123
 )
 
 modelSettings <- list(
