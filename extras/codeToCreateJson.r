@@ -142,22 +142,6 @@ gradientBoostingModelSettings <- setGradientBoostingMachine(
   seed = 1e3
 )
 
-multiLayerPerceptronModelSettings <- setMultiLayerPerceptron(
-  seed = 1e3,
-  sizeEmbedding = 2^(6:9),
-  numLayers = 1:8,
-  sizeHidden = 2^(6:10),
-  dropout = seq(0, 3e-1, 5e-2),
-  weightDecay = c(1e-6, 1e-3),
-  learningRate = "auto",
-  device = 'cuda:0',
-  hyperParamSearch = 'random',
-  randomSample = 1e2,
-  randomSampleSeed = 123,
-  batchSize = 2^10,
-  epochs = 50
-)
-
 resNetModelSettings <- setResNet(
   sizeEmbedding = 2^(6:9),
   numLayers = 1:8,
@@ -206,7 +190,6 @@ transformerModelSettings <- setTransformer(
 modelSettings <- list(
   logisticRegressionModelSettings,
   gradientBoostingModelSettings,
-  multiLayerPerceptronModelSettings,
   resNetModelSettings,
   transformerModelSettings
 )
