@@ -159,25 +159,27 @@ multiLayerPerceptronModelSettings <- setMultiLayerPerceptron(
 )
 
 resNetModelSettings <- setResNet(
-  seed = 1e3,
   sizeEmbedding = 2^(6:9),
   numLayers = 1:8,
   sizeHidden = 2^(6:10),
   hiddenFactor = 1:4,
   hiddenDropout = seq(0, 3e-1, 5e-2),
   residualDropout = seq(0, 3e-1, 5e-2),
-  weightDecay = c(1e-6, 1e-3),
-  learningRate = "auto",
-  device = "cuda:0",
   hyperParamSearch = 'random',
   randomSample = 1e2,
   randomSampleSeed = 123,
-  batchSize = 2^10,
-  epochs = 50
+  estimatorSettings = setEstimator(
+    weightDecay = c(1e-6, 1e-3),
+    batchSize=5*2^10,
+    learningRate = "auto",
+    device = "cuda:0",
+    epochs=5e1,
+    seed=1e3,
+    earlyStopping = list(useEarlyStopping=TRUE,
+                         params = list(patience=6)))
 )
 
 transformerModelSettings <- setTransformer(
-  seed = 1e3,
   numBlocks = 2:4,
   dimToken = 2^(6:9),
   dimOut = 1,
@@ -187,14 +189,18 @@ transformerModelSettings <- setTransformer(
   resDropout = seq(0, 3e-1, 5e-2),
   dimHidden = NULL,
   dimHiddenRatio = 4/3,
-  weightDecay = c(1e-6, 1e-3),
-  learningRate = "auto",
-  batchSize = 2^10,
-  epochs = 50,
-  device = 'cuda:0',
   hyperParamSearch = 'random',
   randomSample = 1e2,
-  randomSampleSeed = 123
+  randomSampleSeed = 123,
+  estimatorSettings = setEstimator(
+    weightDecay = c(1e-6, 1e-3),
+    batchSize=2^10,
+    learningRate = "auto",
+    device = 'cuda:0',
+    epochs=5e1,
+    seed=1e3,
+    earlyStopping = list(useEarlyStopping=TRUE,
+                         params = list(patience=6)))
 )
 
 modelSettings <- list(
