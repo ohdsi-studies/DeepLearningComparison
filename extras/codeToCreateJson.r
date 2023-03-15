@@ -160,7 +160,7 @@ resNetModelSettings <- setResNet(
     epochs=5e1,
     seed=1e3,
     earlyStopping = list(useEarlyStopping=TRUE,
-                         params = list(patience=6)))
+                         params = list(patience=4)))
 )
 
 transformerModelSettings <- setTransformer(
@@ -184,7 +184,7 @@ transformerModelSettings <- setTransformer(
     epochs=5e1,
     seed=1e3,
     earlyStopping = list(useEarlyStopping=TRUE,
-                         params = list(patience=6)))
+                         params = list(patience=4)))
 )
 
 modelSettings <- list(
