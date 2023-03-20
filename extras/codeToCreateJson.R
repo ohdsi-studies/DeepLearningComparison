@@ -329,7 +329,7 @@ for (modelSetting in classicModelSettings) {
 
 
 # source the latest PatientLevelPredictionModule SettingsFunctions.R
-source("https://raw.githubusercontent.com/OHDSI/DeepPatientLevelPredictionModule/v0.0.1/SettingsFunctions.R")
+source("https://raw.githubusercontent.com/OHDSI/DeepPatientLevelPredictionModule/v0.0.5/SettingsFunctions.R")
 source("https://raw.githubusercontent.com/OHDSI/PatientLevelPredictionModule/v0.0.8/SettingsFunctions.R")
 
 # this will load a function called createPatientLevelPredictionModuleSpecifications
