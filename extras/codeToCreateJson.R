@@ -203,7 +203,7 @@ deepModelDesignList <- list()
 class(deepModelDesignList) <- 'leGrandeDesignListOfList'
 
 classicModelDesignList <- list()
-class(classicDesignList) <- 'leGrandeDesignListOfList'
+class(classicModelDesignList) <- 'leGrandeDesignListOfList'
 
 # lung cancer deep
 for (modelSetting in deepModelSettings) {
@@ -350,7 +350,7 @@ analysisSpecifications <- createEmptyAnalysisSpecificiations() %>%
   addModuleSpecifications(deepPatientLevelPredictionModuleSpecifications)
 
 # SAVING TO SHARE
-ParallelLogger::saveSettingsToJson(analysisSpecifications, '/Users/jreps/Documents/GitHub/DeepLearningComparison/deep_comp_study.json')
+ParallelLogger::saveSettingsToJson(analysisSpecifications, 'deep_comp_study.json')
 
 
 
