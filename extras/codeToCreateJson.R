@@ -226,7 +226,7 @@ for (modelSetting in deepModelSettings) {
 }
 
 # lung cancer classic
-for (modelSetting in classicModelDesignList) {
+for (modelSetting in classicModelSettings) {
   classicModelDesignList <- append(
     classicModelDesignList,
     list(PatientLevelPrediction::createModelDesign(
@@ -329,7 +329,7 @@ for (modelSetting in classicModelSettings) {
 
 
 # source the latest PatientLevelPredictionModule SettingsFunctions.R
-source("https://raw.githubusercontent.com/OHDSI/DeepPatientLevelPredictionModule/v0.0.5/SettingsFunctions.R")
+source("https://raw.githubusercontent.com/OHDSI/DeepPatientLevelPredictionModule/v0.0.6/SettingsFunctions.R")
 source("https://raw.githubusercontent.com/OHDSI/PatientLevelPredictionModule/v0.0.8/SettingsFunctions.R")
 
 # this will load a function called createPatientLevelPredictionModuleSpecifications
