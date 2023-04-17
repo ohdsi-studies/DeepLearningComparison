@@ -187,9 +187,10 @@ transformerModelSettings <- setTransformer(
                          params = list(patience=4)))
 )
 
-modelSettings <- list(
-  logisticRegressionModelSettings,
-  gradientBoostingModelSettings,
+classicModelSettings <- list(logisticRegressionModelSettings,
+                               gradientBoostingModelSettings)
+
+deepModelSettings <- list(
   resNetModelSettings,
   transformerModelSettings
 )
@@ -198,13 +199,16 @@ modelSettings <- list(
 # MODEL DESIGNS ################################################################
 ################################################################################
 
-modelDesignList <- list()
-class(modelDesignList) <- 'leGrandeDesignListOfList'
+deepModelDesignList <- list()
+class(deepModelDesignList) <- 'leGrandeDesignListOfList'
 
-# lung cancer
-for (modelSetting in modelSettings) {
-  modelDesignList <- append(
-    modelDesignList,
+classicModelDesignList <- list()
+class(classicModelDesignList) <- 'leGrandeDesignListOfList'
+
+# lung cancer deep
+for (modelSetting in deepModelSettings) {
+  deepModelDesignList <- append(
+    deepModelDesignList,
     list(PatientLevelPrediction::createModelDesign(
       targetId = cohortIds$lungCancer$target,
       outcomeId = cohortIds$lungCancer$outcome,
@@ -221,10 +225,30 @@ for (modelSetting in modelSettings) {
   )
 }
 
-# MDD bipolar 1-year
-for (modelSetting in modelSettings) {
-  modelDesignList <- append(
-    modelDesignList,
+# lung cancer classic
+for (modelSetting in classicModelSettings) {
+  classicModelDesignList <- append(
+    classicModelDesignList,
+    list(PatientLevelPrediction::createModelDesign(
+      targetId = cohortIds$lungCancer$target,
+      outcomeId = cohortIds$lungCancer$outcome,
+      restrictPlpDataSettings = restrictPlpDataSettings,
+      populationSettings = lungCancerPopulationSettings,
+      covariateSettings = covariateSettings,
+      featureEngineeringSettings = NULL,
+      sampleSettings = NULL,
+      preprocessSettings = preprocessSettings,
+      modelSettings = modelSetting,
+      splitSettings = splitSettings,
+      runCovariateSummary = T)
+    )
+  )
+}
+
+# MDD bipolar 1-year deep
+for (modelSetting in deepModelSettings) {
+  deepModelDesignList <- append(
+    deepModelDesignList,
     list(PatientLevelPrediction::createModelDesign(
       targetId = cohortIds$bipolar$target,
       outcomeId = cohortIds$bipolar$outcome,
@@ -241,10 +265,32 @@ for (modelSetting in modelSettings) {
   )
 }
 
-# dementia 5-year
-for (modelSetting in modelSettings) {
-  modelDesignList <- append(
-    modelDesignList,
+# MDD bipolar 1-year classic
+for (modelSetting in classicModelSettings) {
+  classicModelDesignList <- append(
+    classicModelDesignList,
+    list(PatientLevelPrediction::createModelDesign(
+      targetId = cohortIds$bipolar$target,
+      outcomeId = cohortIds$bipolar$outcome,
+      restrictPlpDataSettings = restrictPlpDataSettings,
+      populationSettings = bipolarPopulationSettings,
+      covariateSettings = covariateSettings,
+      featureEngineeringSettings = NULL,
+      sampleSettings = NULL,
+      preprocessSettings = preprocessSettings,
+      modelSettings = modelSetting,
+      splitSettings = splitSettings,
+      runCovariateSummary = T)
+    )
+  )
+}
+
+
+
+# dementia 5-year deep
+for (modelSetting in deepModelSettings) {
+  deepModelDesignList <- append(
+    deepModelDesignList,
     list(PatientLevelPrediction::createModelDesign(
       targetId = cohortIds$dementia$target,
       outcomeId = cohortIds$dementia$outcome,
@@ -261,8 +307,30 @@ for (modelSetting in modelSettings) {
   )
 }
 
+# dementia 5-year classic
+for (modelSetting in classicModelSettings) {
+  classicModelDesignList <- append(
+    classicModelDesignList,
+    list(PatientLevelPrediction::createModelDesign(
+      targetId = cohortIds$dementia$target,
+      outcomeId = cohortIds$dementia$outcome,
+      restrictPlpDataSettings = restrictPlpDataSettings,
+      populationSettings = dementiaPopulationSettings,
+      covariateSettings = covariateSettings,
+      featureEngineeringSettings = NULL,
+      sampleSettings = NULL,
+      preprocessSettings = preprocessSettings,
+      modelSettings = modelSetting,
+      splitSettings = splitSettings,
+      runCovariateSummary = T)
+    )
+  )
+}
+
+
 # source the latest PatientLevelPredictionModule SettingsFunctions.R
-source("https://raw.githubusercontent.com/OHDSI/DeepPatientLevelPredictionModule/v0.0.1/SettingsFunctions.R")
+source("https://raw.githubusercontent.com/OHDSI/DeepPatientLevelPredictionModule/v0.0.6/SettingsFunctions.R")
+source("https://raw.githubusercontent.com/OHDSI/PatientLevelPredictionModule/v0.0.8/SettingsFunctions.R")
 
 # this will load a function called createPatientLevelPredictionModuleSpecifications
 # that takes as input a modelDesignList
@@ -270,17 +338,19 @@ source("https://raw.githubusercontent.com/OHDSI/DeepPatientLevelPredictionModule
 
 # now we create a specification for the prediction module
 # using the model designs list we define previously as input
-patientLevelPredictionModuleSpecifications <- createDeepPatientLevelPredictionModuleSpecifications(modelDesignList)
+deepPatientLevelPredictionModuleSpecifications <- createDeepPatientLevelPredictionModuleSpecifications(deepModelDesignList)
+patientLevelPredictionModuleSpecifications <- createPatientLevelPredictionModuleSpecifications(classicModelDesignList)
 
 
 # CREATING FULL STUDY SPEC
 analysisSpecifications <- createEmptyAnalysisSpecificiations() %>%
   addSharedResources(createCohortSharedResource(cohortDefinitions)) %>%
   addModuleSpecifications(cohortGeneratorModuleSpecifications) %>%
-  addModuleSpecifications(patientLevelPredictionModuleSpecifications)
+  addModuleSpecifications(patientLevelPredictionModuleSpecifications) %>%
+  addModuleSpecifications(deepPatientLevelPredictionModuleSpecifications)
 
 # SAVING TO SHARE
-ParallelLogger::saveSettingsToJson(analysisSpecifications, '/Users/jreps/Documents/GitHub/DeepLearningComparison/deep_comp_study.json')
+ParallelLogger::saveSettingsToJson(analysisSpecifications, 'deep_comp_study.json')
 
 
 
