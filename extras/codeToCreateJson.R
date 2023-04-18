@@ -11,7 +11,7 @@ if (!require("DeepPatientLevelPrediction")) remotes::install_github('ohdsi/DeepP
 ################################################################################
 
 cohortIds <- list(dementia = list(target = 11931, outcome = 6243),
-                  lungCancer = list(target = 11765, outcome = 298),
+                  lungCancer = list(target = 11932, outcome = 298),
                   bipolar = list(target = 10460, outcome = 10461))
 
 # EXTRACTING COHORTS
