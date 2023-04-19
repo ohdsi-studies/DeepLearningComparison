@@ -4,15 +4,15 @@ if (!require("remotes")) install.packages("remotes"); library(remotes)
 if (!require("dplyr")) install.packages("dplyr"); library(dplyr)
 if (!require("Strategus")) remotes::install_github('ohdsi/Strategus', upgrade = "never"); library(Strategus)
 if (!require("PatientLevelPrediction")) remotes::install_github('ohdsi/PatientLevelPrediction', upgrade = "never"); library(PatientLevelPrediction)
-if (!require("DeepPatientLevelPrediction")) remotes::install_github('ohdsi/DeepPatientLevelPrediction', ref = "develop", upgrade = "never"); library(DeepPatientLevelPrediction)
+if (!require("DeepPatientLevelPrediction")) remotes::install_github('ohdsi/DeepPatientLevelPrediction', upgrade = "never"); library(DeepPatientLevelPrediction)
 
 ################################################################################
 # COHORTS ######################################################################
 ################################################################################
 
-cohortIds <- list(dementia = list(target = 11762, outcome = 6243),
-                  lungCancer = list(target = 11765, outcome = 298),
-                  bipolar = list(target = 10460, outcome = 10461))
+cohortIds <- list(dementia = list(target = 11931, outcome = 6243),
+                  lungCancer = list(target = 11932, outcome = 298),
+                  bipolar = list(target = 11454, outcome = 10461))
 
 # EXTRACTING COHORTS
 baseUrl <- keyring::key_get('webapi', 'baseurl')
@@ -42,10 +42,10 @@ createCohortSharedResource <- function(cohortDefinitionSet) {
 }
 
 
-# COHOT GENERATION SETTINGS
+# COHORT GENERATION SETTINGS
 
 # source the cohort generator settings function
-source("https://raw.githubusercontent.com/OHDSI/CohortGeneratorModule/v0.0.13/SettingsFunctions.R")
+source("https://raw.githubusercontent.com/OHDSI/CohortGeneratorModule/v0.1.0/SettingsFunctions.R")
 # this loads a function called createCohortGeneratorModuleSpecifications that takes as
 # input incremental (boolean) and generateStats (boolean)
 
@@ -142,6 +142,18 @@ gradientBoostingModelSettings <- setGradientBoostingMachine(
   seed = 1e3
 )
 
+
+getDevice <- function() {
+  dev <- Sys.getenv("deepPLPDevice")
+  if(dev == "") {
+    if (torch::cuda_is_available()) "cuda:0" else "cpu"
+  }
+  else {
+    dev
+  }
+  dev
+}
+
 resNetModelSettings <- setResNet(
   sizeEmbedding = 2^(6:9),
   numLayers = 1:8,
@@ -156,7 +168,7 @@ resNetModelSettings <- setResNet(
     weightDecay = c(1e-6, 1e-3),
     batchSize=5*2^10,
     learningRate = "auto",
-    device = "cuda:0",
+    device = getDevice,
     epochs=5e1,
     seed=1e3,
     earlyStopping = list(useEarlyStopping=TRUE,
@@ -180,7 +192,7 @@ transformerModelSettings <- setTransformer(
     weightDecay = c(1e-6, 1e-3),
     batchSize=2^10,
     learningRate = "auto",
-    device = 'cuda:0',
+    device = getDevice,
     epochs=5e1,
     seed=1e3,
     earlyStopping = list(useEarlyStopping=TRUE,
@@ -203,7 +215,7 @@ deepModelDesignList <- list()
 class(deepModelDesignList) <- 'leGrandeDesignListOfList'
 
 classicModelDesignList <- list()
-class(classicDesignList) <- 'leGrandeDesignListOfList'
+class(classicModelDesignList) <- 'leGrandeDesignListOfList'
 
 # lung cancer deep
 for (modelSetting in deepModelSettings) {
@@ -329,8 +341,8 @@ for (modelSetting in classicModelSettings) {
 
 
 # source the latest PatientLevelPredictionModule SettingsFunctions.R
-source("https://raw.githubusercontent.com/OHDSI/DeepPatientLevelPredictionModule/v0.0.5/SettingsFunctions.R")
-source("https://raw.githubusercontent.com/OHDSI/PatientLevelPredictionModule/v0.0.8/SettingsFunctions.R")
+source("https://raw.githubusercontent.com/OHDSI/DeepPatientLevelPredictionModule/v0.0.7/SettingsFunctions.R")
+source("https://raw.githubusercontent.com/OHDSI/PatientLevelPredictionModule/v0.1.0/SettingsFunctions.R")
 
 # this will load a function called createPatientLevelPredictionModuleSpecifications
 # that takes as input a modelDesignList
@@ -343,65 +355,12 @@ patientLevelPredictionModuleSpecifications <- createPatientLevelPredictionModule
 
 
 # CREATING FULL STUDY SPEC
-analysisSpecifications <- createEmptyAnalysisSpecificiations() %>%
-  addSharedResources(createCohortSharedResource(cohortDefinitions)) %>%
-  addModuleSpecifications(cohortGeneratorModuleSpecifications) %>%
-  addModuleSpecifications(patientLevelPredictionModuleSpecifications) %>%
+analysisSpecifications <- createEmptyAnalysisSpecificiations() |>
+  addSharedResources(createCohortSharedResource(cohortDefinitions)) |>
+  addModuleSpecifications(cohortGeneratorModuleSpecifications) |>
+  addModuleSpecifications(patientLevelPredictionModuleSpecifications)|>
   addModuleSpecifications(deepPatientLevelPredictionModuleSpecifications)
 
 # SAVING TO SHARE
-ParallelLogger::saveSettingsToJson(analysisSpecifications, '/Users/jreps/Documents/GitHub/DeepLearningComparison/deep_comp_study.json')
-
-
-
-
-
-
-
-# RUNNING JSON SPEC
-# load the json spec
-analysisSpecifications <- ParallelLogger::loadSettingsFromJson('<location to json file>')
-
-connectionDetailsReference <- "Example"
-
-connectionDetails <- DatabaseConnector::createConnectionDetails(
-  dbms = keyring::key_get('dbms', 'all'),
-  server = keyring::key_get('server', 'ccae'),
-  user = keyring::key_get('user', 'all'),
-  password = keyring::key_get('pw', 'all'),
-  port = keyring::key_get('port', 'all')#,
-)
-
-workDatabaseSchema <- keyring::key_get('workDatabaseSchema', 'all')
-cdmDatabaseSchema <- keyring::key_get('cmdDatabaseSchema', 'ccae')
-
-outputLocation <- '/Users/jreps/Documents/plp_example'
-minCellCount <- 5
-cohortTableName <- "strategus_example1"
-
-##=========== END OF INPUTS ==========
-
-storeConnectionDetails(
-  connectionDetails = connectionDetails,
-  connectionDetailsReference = connectionDetailsReference
-)
-
-executionSettings <- createExecutionSettings(
-  connectionDetailsReference = connectionDetailsReference,
-  workDatabaseSchema = workDatabaseSchema,
-  cdmDatabaseSchema = cdmDatabaseSchema,
-  cohortTableNames = CohortGenerator::getCohortTableNames(cohortTable = cohortTableName),
-  workFolder = file.path(outputLocation, "strategusWork"),
-  resultsFolder = file.path(outputLocation, "strategusOutput"),
-  minCellCount = minCellCount
-)
-
-# Note: this environmental variable should be set once for each compute node
-Sys.setenv("INSTANTIATED_MODULES_FOLDER" = file.path(outputLocation, "StrategusInstantiatedModules"))
-
-execute(
-  analysisSpecifications = analysisSpecifications,
-  executionSettings = executionSettings,
-  executionScriptFolder = file.path(outputLocation, "strategusExecution")
-)
+ParallelLogger::saveSettingsToJson(analysisSpecifications, 'deep_comp_study.json')
 
