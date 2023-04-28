@@ -1,5 +1,4 @@
 
-rstudioapi::restartSession()
 if (!require("remotes")) install.packages("remotes"); library(remotes)
 if (!require("dplyr")) install.packages("dplyr"); library(dplyr)
 if (!require("Strategus")) remotes::install_github('ohdsi/Strategus', upgrade = "never"); library(Strategus)
@@ -146,10 +145,7 @@ gradientBoostingModelSettings <- setGradientBoostingMachine(
 getDevice <- function() {
   dev <- Sys.getenv("deepPLPDevice")
   if(dev == "") {
-    if (torch::cuda_is_available()) "cuda:0" else "cpu"
-  }
-  else {
-    dev
+    if (torch::cuda_is_available()) dev<-"cuda:0" else dev<-"cpu"
   }
   dev
 }
@@ -203,8 +199,8 @@ classicModelSettings <- list(logisticRegressionModelSettings,
                                gradientBoostingModelSettings)
 
 deepModelSettings <- list(
-  resNetModelSettings,
-  transformerModelSettings
+  resNetModelSettings #,
+  # transformerModelSettings
 )
 
 ################################################################################
@@ -238,7 +234,7 @@ for (modelSetting in deepModelSettings) {
 }
 
 # lung cancer classic
-for (modelSetting in classicModelDesignList) {
+for (modelSetting in classicModelSettings) {
   classicModelDesignList <- append(
     classicModelDesignList,
     list(PatientLevelPrediction::createModelDesign(
@@ -341,8 +337,9 @@ for (modelSetting in classicModelSettings) {
 
 
 # source the latest PatientLevelPredictionModule SettingsFunctions.R
-source("https://raw.githubusercontent.com/OHDSI/DeepPatientLevelPredictionModule/v0.0.7/SettingsFunctions.R")
+source("https://raw.githubusercontent.com/OHDSI/DeepPatientLevelPredictionModule/v0.0.8/SettingsFunctions.R")
 source("https://raw.githubusercontent.com/OHDSI/PatientLevelPredictionModule/v0.1.0/SettingsFunctions.R")
+
 
 # this will load a function called createPatientLevelPredictionModuleSpecifications
 # that takes as input a modelDesignList
@@ -358,9 +355,8 @@ patientLevelPredictionModuleSpecifications <- createPatientLevelPredictionModule
 analysisSpecifications <- createEmptyAnalysisSpecificiations() |>
   addSharedResources(createCohortSharedResource(cohortDefinitions)) |>
   addModuleSpecifications(cohortGeneratorModuleSpecifications) |>
-  addModuleSpecifications(patientLevelPredictionModuleSpecifications)|>
+#  addModuleSpecifications(patientLevelPredictionModuleSpecifications)|>
   addModuleSpecifications(deepPatientLevelPredictionModuleSpecifications)
 
 # SAVING TO SHARE
 ParallelLogger::saveSettingsToJson(analysisSpecifications, 'deep_comp_study.json')
-
