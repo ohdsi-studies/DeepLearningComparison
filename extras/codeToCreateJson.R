@@ -340,7 +340,6 @@ for (modelSetting in classicModelSettings) {
 source("https://raw.githubusercontent.com/OHDSI/DeepPatientLevelPredictionModule/v0.0.8/SettingsFunctions.R")
 source("https://raw.githubusercontent.com/OHDSI/PatientLevelPredictionModule/v0.1.0/SettingsFunctions.R")
 
-
 # this will load a function called createPatientLevelPredictionModuleSpecifications
 # that takes as input a modelDesignList
 # createPatientLevelPredictionModuleSpecifications(modelDesignList)
