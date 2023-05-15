@@ -7,13 +7,13 @@ library(Strategus)
 # Inputs to run (edit these for your CDM):
 # ========================================= #
 
-database <- 'optum_ehr' # your database name
+database <- 'databaseName' # your database name
 
 # reference for the connection used by Strategus
 connectionDetailsReference <- paste0("DeepLearningComparison_", database)
 
 # where to save the output
-outputFolder <- 'F:/plp_example/'
+outputFolder <- 'outputLocation'
 
 
 connectionDetails <- DatabaseConnector::createConnectionDetails(
@@ -29,7 +29,7 @@ connectionDetails <- DatabaseConnector::createConnectionDetails(
 workDatabaseSchema <- keyring::key_get('workDatabaseSchema', 'all')
 
 # name of cohort table for study
-cohortTable <- "strategus_example1"
+cohortTable <- "strategus_cohort_table"
 
 # schema where the cdm data is
 cdmDatabaseSchema <- keyring::key_get('cdmDatabaseSchema', database)
@@ -40,7 +40,7 @@ minCellCount <- 5
 
 # Location to Strategus modules
 # Note: this environmental variable should be set once for each compute node
-Sys.setenv("INSTANTIATED_MODULES_FOLDER" = 'F:/modules')
+Sys.setenv("INSTANTIATED_MODULES_FOLDER" = 'moduleLocation')
 
  
 # =========== END OF INPUTS ========== #
