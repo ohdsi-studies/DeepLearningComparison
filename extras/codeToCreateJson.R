@@ -85,6 +85,13 @@ preprocessSettings <- createPreprocessSettings(
   normalize = TRUE,
   removeRedundancy = TRUE
 )
+
+deepPreprocessSettings <- createPreprocessSettings(
+  minFraction = 1e-3,
+  normalize = TRUE,
+  removeRedundancy = TRUE
+)
+
 ################################################################################
 # POPULATION SETTINGS ##########################################################
 ################################################################################
@@ -225,7 +232,7 @@ for (modelSetting in deepModelSettings) {
       covariateSettings = covariateSettings,
       featureEngineeringSettings = NULL,
       sampleSettings = NULL,
-      preprocessSettings = preprocessSettings,
+      preprocessSettings = deepPreprocessSettings,
       modelSettings = modelSetting,
       splitSettings = splitSettings,
       runCovariateSummary = T)
@@ -265,7 +272,7 @@ for (modelSetting in deepModelSettings) {
       covariateSettings = covariateSettings,
       featureEngineeringSettings = NULL,
       sampleSettings = NULL,
-      preprocessSettings = preprocessSettings,
+      preprocessSettings = deepPreprocessSettings,
       modelSettings = modelSetting,
       splitSettings = splitSettings,
       runCovariateSummary = T)
@@ -307,7 +314,7 @@ for (modelSetting in deepModelSettings) {
       covariateSettings = covariateSettings,
       featureEngineeringSettings = NULL,
       sampleSettings = NULL,
-      preprocessSettings = preprocessSettings,
+      preprocessSettings = deepPreprocessSettings,
       modelSettings = modelSetting,
       splitSettings = splitSettings,
       runCovariateSummary = T)
