@@ -193,7 +193,7 @@ transformerModelSettings <- setTransformer(
   randomSampleSeed = 123,
   estimatorSettings = setEstimator(
     weightDecay = c(1e-6, 1e-3),
-    batchSize=2^10,
+    batchSize=2^9,
     learningRate = "auto",
     device = getDevice,
     epochs=5e1,
