@@ -6,23 +6,38 @@ if (!require("PatientLevelPrediction")) remotes::install_github('ohdsi/PatientLe
 if (!require("DeepPatientLevelPrediction")) remotes::install_github('ohdsi/DeepPatientLevelPrediction', upgrade = "never"); library(DeepPatientLevelPrediction)
 
 options(renv.config.mran.enabled = FALSE)
+# credentials::set_github_pat()
 
 # MODEL TRANSFER ----------------------------------------------------------
 
-# library(Eunomia)
-# connectionDetails <- getEunomiaConnectionDetails()
-# Eunomia::createCohorts(connectionDetails)
 
-source('https://raw.githubusercontent.com/OHDSI/ModelTransferModule/main/SettingsFunctions.R')
+source('https://raw.githubusercontent.com/OHDSI/ModelTransferModule/v0.0.6/SettingsFunctions.R')
 
-s3Settings <- data_frame(modelZipLocation = character(), bucket = character(), region = character()) |>
-  add_row(modelZipLocation="ipci/ipci.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
-  add_row(modelZipLocation="opehr/lr.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1")
+s3Settings <- tibble(modelZipLocation = character(), bucket = character(), region = character()) |>
+  add_row(modelZipLocation="ipci/lr.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="ipci/gb.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="ipci/rn.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="ipci/tf.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="opehr/lr.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="opehr/gb.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="opehr/rn.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="opehr/tf.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="opses/lr.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="opses/gb.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="opses/rn.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="opses/tf.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="ausom/lr.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="ausom/gb.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="ausom/rn.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="ausom/tf.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1")
   
 modelTransferModuleSpecs <- createModelTransferModuleSpecifications(
   s3Settings = s3Settings
 )
 
+# library(Eunomia)
+# connectionDetails <- getEunomiaConnectionDetails()
+# Eunomia::createCohorts(connectionDetails)
 # 
 # analysisSpecifications <- createEmptyAnalysisSpecificiations() |>
 #   addModuleSpecifications(modelTransferModuleSpecs)
@@ -166,17 +181,17 @@ lungCancerPopulationSettings <- createStudyPopulationSettings(
 
 # dementia
 dementiaPopulationSettings <- createStudyPopulationSettings(
-  binary = T, 
-  includeAllOutcomes = T, 
-  firstExposureOnly = T, 
-  washoutPeriod = 365, 
-  removeSubjectsWithPriorOutcome = F, 
-  priorOutcomeLookback = 99999, 
-  requireTimeAtRisk = T, 
-  minTimeAtRisk = 1, 
-  riskWindowStart = 1, 
-  startAnchor = 'cohort start', 
-  endAnchor = 'cohort start', 
+  binary = T,
+  includeAllOutcomes = T,
+  firstExposureOnly = T,
+  washoutPeriod = 365,
+  removeSubjectsWithPriorOutcome = F,
+  priorOutcomeLookback = 99999,
+  requireTimeAtRisk = T,
+  minTimeAtRisk = 1,
+  riskWindowStart = 1,
+  startAnchor = 'cohort start',
+  endAnchor = 'cohort start',
   riskWindowEnd = 1825
 )
 
@@ -195,8 +210,48 @@ bipolarPopulationSettings <- createStudyPopulationSettings(
 
 source('https://raw.githubusercontent.com/OHDSI/PatientLevelPredictionValidationModule/main/SettingsFunctions.R')
 
+# cohortIds <- list(dementia = list(target = 11931, outcome = 6243),
+#                   lungCancer = list(target = 11932, outcome = 298),
+#                   bipolar = list(target = 11454, outcome = 10461))
 
-predictionValidationModuleSpecifications <- createPatientLevelPredictionValidationModuleSpecifications()
+
+validationComponentsList <- list(
+  list(
+    targetId = cohortIds$dementia$target,
+    oucomeId = cohortIds$dementia$outcome,
+    restrictPlpDataSettings = restrictPlpDataSettings, # vector
+    validationSettings = PatientLevelPrediction::createValidationSettings(
+      recalibrate = NULL,
+      runCovariateSummary = T
+    ),
+    populationSettings = dementiaPopulationSettings  
+  ), 
+  list(
+    targetId = cohortIds$lungCancer$target,
+    oucomeId = cohortIds$lungCancer$outcome,
+    restrictPlpDataSettings = restrictPlpDataSettings, # vector
+    validationSettings = PatientLevelPrediction::createValidationSettings(
+      recalibrate = NULL,
+      runCovariateSummary = T
+    ),
+    populationSettings = dementiaPopulationSettings  
+  ),
+  list(
+    targetId = cohortIds$bipolar$target,
+    oucomeId = cohortIds$bipolar$outcome,
+    restrictPlpDataSettings = restrictPlpDataSettings, # vector
+    validationSettings = PatientLevelPrediction::createValidationSettings(
+      recalibrate = NULL,
+      runCovariateSummary = T
+    ),
+    populationSettings = dementiaPopulationSettings  
+  )
+)
+
+
+predictionValidationModuleSpecifications <- createPatientLevelPredictionValidationModuleSpecifications(
+  validationComponentsList = validationComponentsList
+)
 
 
 # source the latest PatientLevelPredictionModule SettingsFunctions.R
@@ -209,24 +264,24 @@ source("https://raw.githubusercontent.com/OHDSI/PatientLevelPredictionModule/v0.
 
 # now we create a specification for the prediction module
 # using the model designs list we define previously as input
-deepPatientLevelPredictionModuleSpecifications <- createDeepPatientLevelPredictionModuleSpecifications(deepModelDesignList)
-patientLevelPredictionModuleSpecifications <- createPatientLevelPredictionModuleSpecifications(classicModelDesignList)
+# deepPatientLevelPredictionModuleSpecifications <- createDeepPatientLevelPredictionModuleSpecifications(deepModelDesignList)
+# patientLevelPredictionModuleSpecifications <- createPatientLevelPredictionModuleSpecifications(classicModelDesignList)
 
 
 # CREATING FULL STUDY SPEC
-analysisSpecifications <- createEmptyAnalysisSpecificiations() |>
-  addSharedResources(createCohortSharedResource(cohortDefinitions)) |>
-  addModuleSpecifications(cohortGeneratorModuleSpecifications) |>
- addModuleSpecifications(patientLevelPredictionModuleSpecifications)|>
-  addModuleSpecifications(deepPatientLevelPredictionModuleSpecifications)
+# analysisSpecifications <- createEmptyAnalysisSpecificiations() |>
+#   addSharedResources(createCohortSharedResource(cohortDefinitions)) |>
+#   addModuleSpecifications(cohortGeneratorModuleSpecifications) |>
+#  addModuleSpecifications(patientLevelPredictionModuleSpecifications)|>
+#   addModuleSpecifications(deepPatientLevelPredictionModuleSpecifications)
 
 analysisSpecifications <- createEmptyAnalysisSpecificiations() |>
   addModuleSpecifications(modelTransferModuleSpecs) |>
   addSharedResources(createCohortSharedResource(cohortDefinitions)) |>
   addModuleSpecifications(cohortGeneratorModuleSpecifications) |>
-  addModuleSpecifications(patientLevelPredictionModuleSpecifications)|>
-  
-  
+  addModuleSpecifications(predictionValidationModuleSpecifications)
+
+
 
 # SAVING TO SHARE
 ParallelLogger::saveSettingsToJson(analysisSpecifications, 'deep_comp_study.json')
