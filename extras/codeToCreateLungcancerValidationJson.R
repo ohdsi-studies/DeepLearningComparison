@@ -4,50 +4,47 @@ if (!require("dplyr")) install.packages("dplyr"); library(dplyr)
 if (!require("Strategus")) remotes::install_github('ohdsi/Strategus', upgrade = "never"); library(Strategus)
 if (!require("PatientLevelPrediction")) remotes::install_github('ohdsi/PatientLevelPrediction', upgrade = "never"); library(PatientLevelPrediction)
 if (!require("DeepPatientLevelPrediction")) remotes::install_github('ohdsi/DeepPatientLevelPrediction', upgrade = "never"); library(DeepPatientLevelPrediction)
+if (!require("Eunomia")) remotes::install_github('ohdsi/Eunomia', upgrade = "never"); library(Eunomia)
 
 options(renv.config.mran.enabled = FALSE)
-# credentials::set_github_pat()
 
 # MODEL TRANSFER ----------------------------------------------------------
 
 
-source('https://raw.githubusercontent.com/OHDSI/ModelTransferModule/v0.0.6/SettingsFunctions.R')
+source('https://raw.githubusercontent.com/OHDSI/ModelTransferModule/v0.0.7/SettingsFunctions.R')
 
 s3Settings <- tibble(modelZipLocation = character(), bucket = character(), region = character()) |>
-  add_row(modelZipLocation="ipci/lr.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
-  add_row(modelZipLocation="ipci/gb.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
-  add_row(modelZipLocation="ipci/rn.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
-  add_row(modelZipLocation="ipci/tf.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
-  add_row(modelZipLocation="opehr/lr.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
-  add_row(modelZipLocation="opehr/gb.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
-  add_row(modelZipLocation="opehr/rn.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
-  add_row(modelZipLocation="opehr/tf.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
-  add_row(modelZipLocation="opses/lr.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
-  add_row(modelZipLocation="opses/gb.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
-  add_row(modelZipLocation="opses/rn.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
-  add_row(modelZipLocation="opses/tf.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
-  add_row(modelZipLocation="ausom/lr.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
-  add_row(modelZipLocation="ausom/gb.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
-  add_row(modelZipLocation="ausom/rn.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
-  add_row(modelZipLocation="ausom/tf.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1")
+  add_row(modelZipLocation="lungcancer/ipci/lr.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="lungcancer/ipci/gb.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="lungcancer/ipci/rn.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="lungcancer/ipci/tf.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="lungcancer/opehr/lr.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="lungcancer/opehr/gb.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="lungcancer/opehr/rn.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="lungcancer/opehr/tf.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="lungcancer/opses/lr.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="lungcancer/opses/gb.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="lungcancer/opses/rn.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="lungcancer/opses/tf.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="lungcancer/ausom/lr.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="lungcancer/ausom/gb.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="lungcancer/ausom/rn.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="lungcancer/ausom/tf.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1")
   
 modelTransferModuleSpecs <- createModelTransferModuleSpecifications(
   s3Settings = s3Settings
 )
 
+
+# DEBUG MODEL TRANSFER MODULE ---------------------------------------------
+
+
+
 # library(Eunomia)
 # connectionDetails <- getEunomiaConnectionDetails()
-# Eunomia::createCohorts(connectionDetails)
 # 
 # analysisSpecifications <- createEmptyAnalysisSpecificiations() |>
 #   addModuleSpecifications(modelTransferModuleSpecs)
-#   # addSharedResources(createCohortSharedResource(cohortDefinitions)) |>
-#   # addModuleSpecifications(cohortGeneratorModuleSpecifications) |>
-#   # addModuleSpecifications(patientLevelPredictionModuleSpecifications)|>
-#   # addModuleSpecifications(deepPatientLevelPredictionModuleSpecifications)
-# 
-# # SAVING TO SHARE
-# ParallelLogger::saveSettingsToJson(analysisSpecifications, 'deep_comp_val_study.json')
 # 
 # # reference for the connection used by Strategus
 # database <- 'databaseName' # your database name
@@ -79,14 +76,13 @@ modelTransferModuleSpecs <- createModelTransferModuleSpecifications(
 #   analysisSpecifications = analysisSpecifications,
 #   executionSettings = executionSettings,
 #   executionScriptFolder = file.path(workDirectory, "strategusExecution"),
-#   restart=F
+#   restart=F,
+#   keyringName = NULL
 # )
 
 # COHORTS -----------------------------------------------------------------
 
-cohortIds <- list(dementia = list(target = 11931, outcome = 6243),
-                  lungCancer = list(target = 11932, outcome = 298),
-                  bipolar = list(target = 11454, outcome = 10461))
+cohortIds <- list(lungCancer = list(target = 11932, outcome = 298))
 
 # EXTRACTING COHORTS
 baseUrl <- keyring::key_get('webapi', 'baseurl')
@@ -179,101 +175,24 @@ lungCancerPopulationSettings <- createStudyPopulationSettings(
   endAnchor = 'cohort start'
 )
 
-# dementia
-dementiaPopulationSettings <- createStudyPopulationSettings(
-  binary = T,
-  includeAllOutcomes = T,
-  firstExposureOnly = T,
-  washoutPeriod = 365,
-  removeSubjectsWithPriorOutcome = F,
-  priorOutcomeLookback = 99999,
-  requireTimeAtRisk = T,
-  minTimeAtRisk = 1,
-  riskWindowStart = 1,
-  startAnchor = 'cohort start',
-  endAnchor = 'cohort start',
-  riskWindowEnd = 1825
-)
-
-# bipolar
-bipolarPopulationSettings <- createStudyPopulationSettings(
-  removeSubjectsWithPriorOutcome = T,
-  priorOutcomeLookback = 99999,
-  requireTimeAtRisk = T,
-  minTimeAtRisk = 1,
-  riskWindowStart = 1,
-  startAnchor = 'cohort start',
-  riskWindowEnd = 365,
-  endAnchor = 'cohort start'
-)
-
-
 source('https://raw.githubusercontent.com/OHDSI/PatientLevelPredictionValidationModule/main/SettingsFunctions.R')
-
-# cohortIds <- list(dementia = list(target = 11931, outcome = 6243),
-#                   lungCancer = list(target = 11932, outcome = 298),
-#                   bipolar = list(target = 11454, outcome = 10461))
-
 
 validationComponentsList <- list(
   list(
-    targetId = cohortIds$dementia$target,
-    oucomeId = cohortIds$dementia$outcome,
+    targetId = cohortIds$lungcancer$target,
+    oucomeId = cohortIds$lungcancer$outcome,
     restrictPlpDataSettings = restrictPlpDataSettings, # vector
     validationSettings = PatientLevelPrediction::createValidationSettings(
       recalibrate = NULL,
       runCovariateSummary = T
     ),
-    populationSettings = dementiaPopulationSettings  
-  ), 
-  list(
-    targetId = cohortIds$lungCancer$target,
-    oucomeId = cohortIds$lungCancer$outcome,
-    restrictPlpDataSettings = restrictPlpDataSettings, # vector
-    validationSettings = PatientLevelPrediction::createValidationSettings(
-      recalibrate = NULL,
-      runCovariateSummary = T
-    ),
-    populationSettings = dementiaPopulationSettings  
-  ),
-  list(
-    targetId = cohortIds$bipolar$target,
-    oucomeId = cohortIds$bipolar$outcome,
-    restrictPlpDataSettings = restrictPlpDataSettings, # vector
-    validationSettings = PatientLevelPrediction::createValidationSettings(
-      recalibrate = NULL,
-      runCovariateSummary = T
-    ),
-    populationSettings = dementiaPopulationSettings  
+    populationSettings = lungCancerPopulationSettings  
   )
 )
-
 
 predictionValidationModuleSpecifications <- createPatientLevelPredictionValidationModuleSpecifications(
   validationComponentsList = validationComponentsList
 )
-
-
-# source the latest PatientLevelPredictionModule SettingsFunctions.R
-source("https://raw.githubusercontent.com/OHDSI/DeepPatientLevelPredictionModule/v0.0.8/SettingsFunctions.R")
-source("https://raw.githubusercontent.com/OHDSI/PatientLevelPredictionModule/v0.1.0/SettingsFunctions.R")
-
-# this will load a function called createPatientLevelPredictionModuleSpecifications
-# that takes as input a modelDesignList
-# createPatientLevelPredictionModuleSpecifications(modelDesignList)
-
-# now we create a specification for the prediction module
-# using the model designs list we define previously as input
-# deepPatientLevelPredictionModuleSpecifications <- createDeepPatientLevelPredictionModuleSpecifications(deepModelDesignList)
-# patientLevelPredictionModuleSpecifications <- createPatientLevelPredictionModuleSpecifications(classicModelDesignList)
-
-
-# CREATING FULL STUDY SPEC
-# analysisSpecifications <- createEmptyAnalysisSpecificiations() |>
-#   addSharedResources(createCohortSharedResource(cohortDefinitions)) |>
-#   addModuleSpecifications(cohortGeneratorModuleSpecifications) |>
-#  addModuleSpecifications(patientLevelPredictionModuleSpecifications)|>
-#   addModuleSpecifications(deepPatientLevelPredictionModuleSpecifications)
 
 analysisSpecifications <- createEmptyAnalysisSpecificiations() |>
   addModuleSpecifications(modelTransferModuleSpecs) |>
@@ -281,7 +200,6 @@ analysisSpecifications <- createEmptyAnalysisSpecificiations() |>
   addModuleSpecifications(cohortGeneratorModuleSpecifications) |>
   addModuleSpecifications(predictionValidationModuleSpecifications)
 
-
-
 # SAVING TO SHARE
-ParallelLogger::saveSettingsToJson(analysisSpecifications, 'deep_comp_study.json')
+ParallelLogger::saveSettingsToJson(analysisSpecifications, 'deep_comp_lungcancer_val_study.json')
+
