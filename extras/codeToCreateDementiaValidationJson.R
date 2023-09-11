@@ -115,7 +115,7 @@ createCohortSharedResource <- function(cohortDefinitionSet) {
 # COHORT GENERATION SETTINGS
 
 # source the cohort generator settings function
-source("https://raw.githubusercontent.com/OHDSI/CohortGeneratorModule/v0.1.0/SettingsFunctions.R")
+source("https://raw.githubusercontent.com/OHDSI/CohortGeneratorModule/v0.2.0/SettingsFunctions.R")
 # this loads a function called createCohortGeneratorModuleSpecifications that takes as
 # input incremental (boolean) and generateStats (boolean)
 
