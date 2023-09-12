@@ -60,7 +60,7 @@
             "studyEndDate": "",
             "firstExposureOnly": false,
             "washoutPeriod": 0,
-            "sampleSize": 1000000,
+            "sampleSize": null,
             "attr_class": "restrictPlpDataSettings"
           },
           "validationSettings": {

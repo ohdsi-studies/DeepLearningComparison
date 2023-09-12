@@ -69,7 +69,7 @@ covariateSettings <- FeatureExtraction::createCovariateSettings(
 )
 
 restrictPlpDataSettings <- createRestrictPlpDataSettings(
-  sampleSize = 1e6,
+  sampleSize = NULL,
 )
 
 splitSettings <- createDefaultSplitSetting(
