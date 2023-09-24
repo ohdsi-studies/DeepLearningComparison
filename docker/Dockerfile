@@ -1,4 +1,4 @@
-FROM rocker/r-ver:4.2.3
+FROM rocker/r-ver:4.2.3 as build
 
 RUN apt-get -y update && apt-get install -y \
       default-jre \
@@ -48,9 +48,26 @@ ENV PIP_NO_CACHE_DIR=1
 RUN Rscript -e "renv::restore()" \
     && rm -rf /root/.cache/R/renv \ 
     && /opt/conda/bin/conda clean -afy
-    
+
+FROM rocker/r-ver:4.2.3
+
+COPY --from=build /project /project
+COPY --from=build /modules /modules
+COPY --from=build /opt/conda /opt/conda
+
+# runtime dependanceis
+RUN apt-get -y update && apt-get install -y \
+      default-jre \
+      libxml2 \
+      libglpk40 \
+      libsodium23 \
+      libsecret-1-0 \ 
+      --no-install-recommends \
+      && R cmd javareconf \
+      && apt-get clean
 
 # create system keyring
+WORKDIR /modules/DeepPatientLevelPredictionModule_0.1.0/
 RUN Rscript -e "keyring::keyring_create('system', password='1234')"
 ENV STRATEGUS_KEYRING_PASSWORD=1234
 
