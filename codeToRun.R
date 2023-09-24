@@ -7,32 +7,32 @@ library(Strategus)
 # Inputs to run (edit these for your CDM):
 # ========================================= #
 
-database <- 'databaseName' # your database name
+database <- Sys.getenv("DATABASE") # your database name
 
 # reference for the connection used by Strategus
 connectionDetailsReference <- paste0("DeepLearningComparison_", database)
 
 # where to save the output
-outputFolder <- 'outputLocation'
+outputFolder <- "/output/"
 
 
 connectionDetails <- DatabaseConnector::createConnectionDetails(
-  dbms = keyring::key_get('dbms', 'all'), 
-  server = keyring::key_get('server', database), 
-  user = keyring::key_get('user', 'all'),
-  password = keyring::key_get('pw', 'all'),
-  port = keyring::key_get('port', 'all'),
-  pathToDriver = Sys.getenv("REDSHIFT_DRIVER")
+  dbms = Sys.getenv('DBMS'), 
+  server = Sys.getenv("DATABASE_SERVER"), 
+  user = Sys.getenv("DATABASE_USER"),
+  password = Sys.getenv("DATABASE_PASSWORD"),
+  port = Sys.getenv("DATABASE_PORT"),
+  pathToDriver = "/database_drivers"
 )
 
 # A schema with write access to store cohort tables
-workDatabaseSchema <- keyring::key_get('workDatabaseSchema', 'all')
+workDatabaseSchema <- Sys.getenv("WORK_SCHEMA")
 
 # name of cohort table for study
-cohortTable <- "strategus_cohort_table"
+cohortTable <- Sys.getenv("STRATEGUS_COHORT_TABLE")
 
 # schema where the cdm data is
-cdmDatabaseSchema <- keyring::key_get('cdmDatabaseSchema', database)
+cdmDatabaseSchema <- Sys.getenv("CDM_SCHEMA")
 
 # Aggregated statistics with cell count less than this are removed before sharing results.
 minCellCount <- 5
@@ -40,7 +40,7 @@ minCellCount <- 5
 
 # Location to Strategus modules
 # Note: this environmental variable should be set once for each compute node
-Sys.setenv("INSTANTIATED_MODULES_FOLDER" = 'moduleLocation')
+Sys.setenv("INSTANTIATED_MODULES_FOLDER" = '/modules/')
 
  
 # =========== END OF INPUTS ========== #
