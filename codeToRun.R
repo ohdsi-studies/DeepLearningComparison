@@ -7,32 +7,31 @@ library(Strategus)
 # Inputs to run (edit these for your CDM):
 # ========================================= #
 
-database <- Sys.getenv("DATABASE") # your database name
+database <- 'local' # your database name
 
 # reference for the connection used by Strategus
 connectionDetailsReference <- paste0("DeepLearningComparison_", database)
 
 # where to save the output
-outputFolder <- "/output/"
+outputFolder <- "./output/"
 
 
 connectionDetails <- DatabaseConnector::createConnectionDetails(
-  dbms = Sys.getenv('DBMS'), 
-  server = Sys.getenv("DATABASE_SERVER"), 
-  user = Sys.getenv("DATABASE_USER"),
-  password = Sys.getenv("DATABASE_PASSWORD"),
-  port = Sys.getenv("DATABASE_PORT"),
-  pathToDriver = "/database_drivers"
+  dbms = 'postgresql',
+  server = 'localhost/cdm',
+  user = 'postgres',
+  password = '1234',
+  port = 5432,
+  pathToDriver = "~/database_drivers"
 )
 
 # A schema with write access to store cohort tables
-workDatabaseSchema <- Sys.getenv("WORK_SCHEMA")
+workDatabaseSchema <- 'results'
 
 # name of cohort table for study
-cohortTable <- Sys.getenv("STRATEGUS_COHORT_TABLE")
-
+cohortTable <- "strategus_cohort_table"
 # schema where the cdm data is
-cdmDatabaseSchema <- Sys.getenv("CDM_SCHEMA")
+cdmDatabaseSchema <- "cdm"
 
 # Aggregated statistics with cell count less than this are removed before sharing results.
 minCellCount <- 5
@@ -40,9 +39,9 @@ minCellCount <- 5
 
 # Location to Strategus modules
 # Note: this environmental variable should be set once for each compute node
-Sys.setenv("INSTANTIATED_MODULES_FOLDER" = '/modules/')
+Sys.setenv("INSTANTIATED_MODULES_FOLDER" = '~/modules/')
 
- 
+
 # =========== END OF INPUTS ========== #
 
 Strategus::storeConnectionDetails(

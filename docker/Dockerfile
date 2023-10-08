@@ -1,4 +1,4 @@
-FROM rocker/r-ver:4.2.3 as build
+FROM docker.io/rocker/r-ver:4.2.3 as build
 
 RUN apt-get -y update && apt-get install -y \
       default-jre \
@@ -49,11 +49,12 @@ RUN Rscript -e "renv::restore()" \
     && rm -rf /root/.cache/R/renv \ 
     && /opt/conda/bin/conda clean -afy
 
-FROM rocker/r-ver:4.2.3
+FROM docker.io/rocker/r-ver:4.2.3
 
 COPY --from=build /project /project
 COPY --from=build /modules /modules
 COPY --from=build /opt/conda /opt/conda
+COPY --from=build /database_drivers /database_drivers
 
 # runtime dependanceis
 RUN apt-get -y update && apt-get install -y \
@@ -66,20 +67,25 @@ RUN apt-get -y update && apt-get install -y \
       && R cmd javareconf \
       && apt-get clean
 
+RUN mkdir /output
+
 # create system keyring
-WORKDIR /modules/DeepPatientLevelPredictionModule_0.1.0/
+WORKDIR /project
 RUN Rscript -e "keyring::keyring_create('system', password='1234')"
 ENV STRATEGUS_KEYRING_PASSWORD=1234
 
-WORKDIR /project
 COPY codeToRun.R codeToRun.R
 
 # add user that owns the output folder
-RUN groupadd -r user && useradd -g user -m user
+# RUN useradd --no-log-init -m user
 
-RUN mkdir /output && chown -R user:user /output
+# RUN mkdir /home/user/output && chown -R user /home/user/output
 
-USER user
+# RUN apt-get -y install gosu
+# COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+# RUN chmod +x /usr/local/bin/entrypoint.sh
+# USER user
+# fENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
 
 
