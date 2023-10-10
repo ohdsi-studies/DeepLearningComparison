@@ -76,16 +76,4 @@ ENV STRATEGUS_KEYRING_PASSWORD=1234
 
 COPY codeToRun.R codeToRun.R
 
-# add user that owns the output folder
-# RUN useradd --no-log-init -m user
-
-# RUN mkdir /home/user/output && chown -R user /home/user/output
-
-# RUN apt-get -y install gosu
-# COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
-# RUN chmod +x /usr/local/bin/entrypoint.sh
-# USER user
-# fENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
-
-
 
