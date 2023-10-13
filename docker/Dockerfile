@@ -8,7 +8,8 @@ RUN apt-get -y update && apt-get install -y \
       libsodium-dev \
       libsecret-1-dev \
       python3-pip \
-      python3-venv \ 
+      python3-venv \
+      libssl-dev  \
       --no-install-recommends \
       && apt-get clean
 
@@ -44,9 +45,9 @@ RUN Rscript -e "renv::activate('.')" \
     -e "reticulate::install_miniconda()" \
     -e "reticulate::conda_install(envname = 'r-reticulate', packages=c('python=3.10'))"
 
-ENV PIP_NO_CACHE_DIR=1     
+ENV PIP_NO_CACHE_DIR=1
 RUN Rscript -e "renv::restore()" \
-    && rm -rf /root/.cache/R/renv \ 
+    && rm -rf /root/.cache/R/renv \
     && /opt/conda/bin/conda clean -afy
 
 FROM docker.io/rocker/r-ver:4.2.3
@@ -62,7 +63,8 @@ RUN apt-get -y update && apt-get install -y \
       libxml2 \
       libglpk40 \
       libsodium23 \
-      libsecret-1-0 \ 
+      libsecret-1-0 \
+      libssl3 \
       --no-install-recommends \
       && R cmd javareconf \
       && apt-get clean
@@ -75,5 +77,10 @@ RUN Rscript -e "keyring::keyring_create('system', password='1234')"
 ENV STRATEGUS_KEYRING_PASSWORD=1234
 
 COPY codeToRun.R codeToRun.R
+
+COPY docker/installDeepPLP.R installDeepPLP.R
+ADD "https://www.random.org/cgi-bin/randbyte?nbytes=10&format=h" skipcache
+RUN Rscript -e "renv::run(script='installDeepPLP.R',  project='/modules/DeepPatientLevelPredictionModule_0.1.0')"
+
 
 
