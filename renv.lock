@@ -1161,6 +1161,11 @@
       ],
       "Hash": "be07d23211245fc7d4209f54c4e4ffc8"
     },
+    "xgboost": {
+      "Package": "xgboost",
+      "Version": "1.7.5.1",
+      "Source": "Repository"
+    },
     "xml2": {
       "Package": "xml2",
       "Version": "1.3.5",
