@@ -196,6 +196,17 @@
       ],
       "Hash": "cd79d1874fb20217463451f8c310c526"
     },
+    "ROhdsiWebApi": {
+      "Package": "ROhdsiWebApi",
+      "Version": "1.3.3",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteUsername": "ohdsi",
+      "RemoteRepo": "ROhdsiWebApi",
+      "RemoteRef": "main",
+      "RemoteSha": "455c81633de6d68dcd675ddb31f471c66e8fa332"
+    },
     "Rcpp": {
       "Package": "Rcpp",
       "Version": "1.0.11",
