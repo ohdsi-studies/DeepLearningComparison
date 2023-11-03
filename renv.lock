@@ -78,6 +78,17 @@
       ],
       "Hash": "fd906a08c06b0322ea13c6310da20c02"
     },
+    "DeepPatientLevelPrediction": {
+      "Package": "DeepPatientLevelPrediction",
+      "Version": "2.0.1",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteUsername": "ohdsi",
+      "RemoteRepo": "DeepPatientLevelPrediction",
+      "RemoteRef": "main",
+      "RemoteSha": "8942e11c4fb36dadb5ad0e8e8018347a317ccc0d"
+    },
     "Matrix": {
       "Package": "Matrix",
       "Version": "1.6-0",
@@ -114,6 +125,17 @@
         "xml2"
       ],
       "Hash": "64b88278107424ea011e310a9b5b83e5"
+    },
+    "PatientLevelPrediction": {
+      "Package": "PatientLevelPrediction",
+      "Version": "6.3.6",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteUsername": "ohdsi",
+      "RemoteRepo": "PatientLevelPrediction",
+      "RemoteRef": "main",
+      "RemoteSha": "7a55c31de7e9a49290c3c35e172962440c70b8a8"
     },
     "R.methodsS3": {
       "Package": "R.methodsS3",
