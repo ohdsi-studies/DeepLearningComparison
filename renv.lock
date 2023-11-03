@@ -1,25 +1,25 @@
 {
   "R": {
-    "Version": "4.2.3",
+    "Version": "4.3.1",
     "Repositories": [
       {
         "Name": "CRAN",
-        "URL": "https://packagemanager.posit.co/cran/__linux__/jammy/latest"
+        "URL": "https://cloud.r-project.org"
       }
     ]
   },
   "Packages": {
     "CohortGenerator": {
       "Package": "CohortGenerator",
-      "Version": "0.8.0",
+      "Version": "0.8.1",
       "Source": "GitHub",
-      "Remotes": "ohdsi/CirceR, ohdsi/Eunomia, ohdsi/ROhdsiWebApi",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
-      "RemoteRepo": "CohortGenerator",
       "RemoteUsername": "ohdsi",
-      "RemoteRef": "HEAD",
-      "RemoteSha": "8379cb8f0b0a089589e6b14be52b752dc687afc6",
+      "RemoteRepo": "CohortGenerator",
+      "RemoteRef": "main",
+      "RemoteSha": "78757f1b191a395cf9dcff0d5bbe2b9fa4aa163e",
+      "Remotes": "ohdsi/CirceR, ohdsi/Eunomia, ohdsi/ROhdsiWebApi",
       "Requirements": [
         "DatabaseConnector",
         "ParallelLogger",
@@ -37,7 +37,7 @@
         "rlang",
         "stringi"
       ],
-      "Hash": "395d780c435b09eb781835166b7e13cb"
+      "Hash": "12b26b68b771bbe771c627452aefe8b5"
     },
     "DBI": {
       "Package": "DBI",
@@ -185,6 +185,34 @@
       ],
       "Hash": "ae6cbbe1492f4de79c45fce06f967ce8"
     },
+    "ResultModelManager": {
+      "Package": "ResultModelManager",
+      "Version": "0.5.1",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteUsername": "ohdsi",
+      "RemoteRepo": "ResultModelManager",
+      "RemoteRef": "main",
+      "RemoteSha": "c1be23c5aa26508acb6b7f9d826aef285871db3e",
+      "Requirements": [
+        "DBI",
+        "DatabaseConnector",
+        "ParallelLogger",
+        "R",
+        "R6",
+        "SqlRender",
+        "checkmate",
+        "dplyr",
+        "fastmap",
+        "lubridate",
+        "pool",
+        "readr",
+        "rlang",
+        "zip"
+      ],
+      "Hash": "1b7dd1c0c0763f020287cfed7e750053"
+    },
     "SqlRender": {
       "Package": "SqlRender",
       "Version": "1.15.2",
@@ -199,21 +227,22 @@
     },
     "Strategus": {
       "Package": "Strategus",
-      "Version": "0.0.6",
+      "Version": "0.1.0",
       "Source": "GitHub",
-      "Remotes": "ohdsi/CohortGenerator, ohdsi/Eunomia",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
-      "RemoteRepo": "strategus",
       "RemoteUsername": "ohdsi",
-      "RemoteRef": "HEAD",
-      "RemoteSha": "d50b9b7a4822278a62de01b16d3b768d398de1d3",
+      "RemoteRepo": "Strategus",
+      "RemoteRef": "main",
+      "RemoteSha": "00d0c0025e252c8cf2c0aaaffdda31057f93bb67",
+      "Remotes": "ohdsi/CohortGenerator, ohdsi/ResultModelManager, ohdsi/Eunomia",
       "Requirements": [
         "CohortGenerator",
         "DatabaseConnector",
         "ParallelLogger",
         "R",
         "R.utils",
+        "ResultModelManager",
         "SqlRender",
         "checkmate",
         "digest",
@@ -226,7 +255,7 @@
         "tibble",
         "utils"
       ],
-      "Hash": "f2949dfa070e4ae41bd9939ae7772c8c"
+      "Hash": "c810546244b945d4e2ee8d2a8da74d50"
     },
     "askpass": {
       "Package": "askpass",
@@ -468,15 +497,22 @@
     },
     "fansi": {
       "Package": "fansi",
-      "Version": "1.0.4",
+      "Version": "1.0.5",
       "Source": "Repository",
-      "Repository": "RSPM",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "grDevices",
         "utils"
       ],
-      "Hash": "1d9e7ad3c8312a192dea7d3db0274fde"
+      "Hash": "3e8583a60163b4bc1a80016e63b9959e"
+    },
+    "fastmap": {
+      "Package": "fastmap",
+      "Version": "1.1.1",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Hash": "f7736a18de97dea803bde0a2daaafb27"
     },
     "filelock": {
       "Package": "filelock",
@@ -599,6 +635,17 @@
       ],
       "Hash": "60885b9f746c9dfaef110d070b5f7dc0"
     },
+    "later": {
+      "Package": "later",
+      "Version": "1.3.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "Rcpp",
+        "rlang"
+      ],
+      "Hash": "40401c9cf2bc2259dfe83311c9384710"
+    },
     "lattice": {
       "Package": "lattice",
       "Version": "0.21-8",
@@ -686,6 +733,22 @@
         "utils"
       ],
       "Hash": "01f28d4278f15c76cddbea05899c5d6f"
+    },
+    "pool": {
+      "Package": "pool",
+      "Version": "1.0.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "DBI",
+        "R",
+        "R6",
+        "later",
+        "methods",
+        "rlang",
+        "withr"
+      ],
+      "Hash": "52d086ff1a2ccccbae6d462cb0773835"
     },
     "prettyunits": {
       "Package": "prettyunits",
@@ -793,12 +856,7 @@
     "renv": {
       "Package": "renv",
       "Version": "1.0.2",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Requirements": [
-        "utils"
-      ],
-      "Hash": "4b22ac016fe54028b88d0c68badbd061"
+      "Source": "Repository"
     },
     "rlang": {
       "Package": "rlang",
@@ -998,19 +1056,19 @@
     },
     "utf8": {
       "Package": "utf8",
-      "Version": "1.2.3",
+      "Version": "1.2.4",
       "Source": "Repository",
       "Repository": "RSPM",
       "Requirements": [
         "R"
       ],
-      "Hash": "1fe17157424bb09c48a8b3b550c753bc"
+      "Hash": "62b65c52671e6665f803ff02954446e9"
     },
     "vctrs": {
       "Package": "vctrs",
-      "Version": "0.6.3",
+      "Version": "0.6.4",
       "Source": "Repository",
-      "Repository": "RSPM",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "cli",
@@ -1018,7 +1076,7 @@
         "lifecycle",
         "rlang"
       ],
-      "Hash": "d0ef2856b83dc33ea6e255caf6229ee2"
+      "Hash": "266c1ca411266ba8f365fcc726444b87"
     },
     "vroom": {
       "Package": "vroom",
@@ -1087,6 +1145,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "0d0056cc5383fbc240ccd0cb584bf436"
+    },
+    "zip": {
+      "Package": "zip",
+      "Version": "2.3.0",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Hash": "d98c94dacb7e0efcf83b0a133a705504"
     }
   }
 }
