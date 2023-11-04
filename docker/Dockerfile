@@ -16,18 +16,14 @@ RUN apt-get -y update && apt-get install -y \
 WORKDIR /project
 COPY renv.lock renv.lock
 
-RUN mkdir -p renv
-COPY .Rprofile .Rprofile
-COPY renv/activate.R renv/activate.R
-COPY renv/settings.json renv/settings.json
-
 # change default location of cache to project folder
-RUN mkdir renv/.cache
+RUN mkdir -p renv/.cache
 ENV RENV_PATHS_CACHE /project/renv/.cache
 
-RUN R cmd javareconf \
-    && Rscript -e "renv::restore(confirm = FALSE)" \
-    && Rscript -e "DatabaseConnector::downloadJdbcDrivers(dbms='all', pathToDriver='/database_drivers/')"
+RUN R cmd javareconf &&  \
+    Rscript -e "install.packages('renv')" && \
+    Rscript -e "renv::restore(confirm = FALSE, library='/usr/local/lib/R/site-library')"  &&  \
+    Rscript -e "DatabaseConnector::downloadJdbcDrivers(dbms='all', pathToDriver='/database_drivers/')"
 
 # initialize modules
 COPY deep_comp_study.json deep_comp_study.json
@@ -39,7 +35,7 @@ COPY docker/addXGBoost.R addXGBoost.R
 RUN Rscript -e "renv::run(script='addXGBoost.R',  project='/modules/PatientLevelPredictionModule_0.2.0')"
 
 # set up python, without conda and pip caches
-WORKDIR /modules/DeepPatientLevelPredictionModule_0.1.0/
+WORKDIR /modules/DeepPatientLevelPredictionModule_0.2.0/
 ENV RETICULATE_MINICONDA_PATH=/opt/conda/
 RUN Rscript -e "renv::activate('.')" \
     -e "reticulate::install_miniconda()" \
@@ -56,6 +52,7 @@ COPY --from=build /project /project
 COPY --from=build /modules /modules
 COPY --from=build /opt/conda /opt/conda
 COPY --from=build /database_drivers /database_drivers
+COPY --from=build /usr/local/lib/R/site-library /usr/local/lib/R/site-library
 
 # runtime dependanceis
 RUN apt-get -y update && apt-get install -y \
@@ -73,14 +70,10 @@ RUN mkdir /output
 
 # create system keyring
 WORKDIR /project
-RUN Rscript -e "keyring::keyring_create('system', password='1234')"
+RUN Rscript -e "install.packages('keyring')" && \
+    Rscript -e "keyring::keyring_create('system', password='1234')"
 ENV STRATEGUS_KEYRING_PASSWORD=1234
 
 COPY codeToRun.R codeToRun.R
-
-COPY docker/installDeepPLP.R installDeepPLP.R
-ADD "https://www.random.org/cgi-bin/randbyte?nbytes=10&format=h" skipcache
-RUN Rscript -e "renv::run(script='installDeepPLP.R',  project='/modules/DeepPatientLevelPredictionModule_0.1.0')"
-
 
 
