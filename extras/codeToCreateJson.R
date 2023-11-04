@@ -148,7 +148,6 @@ gradientBoostingModelSettings <- setGradientBoostingMachine(
   seed = 1e3
 )
 
-
 getDevice <- function() {
   dev <- Sys.getenv("deepPLPDevice")
   if(dev == "") {
@@ -171,7 +170,7 @@ resNetModelSettings <- setResNet(
     weightDecay = c(1e-6, 1e-3),
     batchSize=5*2^10,
     learningRate = "auto",
-    device = getDevice,
+    device = "cuda:0",
     epochs=5e1,
     seed=1e3,
     earlyStopping = list(useEarlyStopping=TRUE,
@@ -195,7 +194,7 @@ transformerModelSettings <- setTransformer(
     weightDecay = c(1e-6, 1e-3),
     batchSize=2^9,
     learningRate = "auto",
-    device = getDevice,
+    device = "cuda:0",
     epochs=5e1,
     seed=1e3,
     earlyStopping = list(useEarlyStopping=TRUE,
@@ -365,4 +364,4 @@ analysisSpecifications <- createEmptyAnalysisSpecificiations() |>
   addModuleSpecifications(deepPatientLevelPredictionModuleSpecifications)
 
 # SAVING TO SHARE
-ParallelLogger::saveSettingsToJson(analysisSpecifications, 'deep_comp_study.json')
+ParallelLogger::saveSettingsToJson(analysisSpecifications, 'deep_comp_cuda0_study.json')
