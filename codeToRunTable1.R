@@ -1,5 +1,4 @@
 
-if (!require("FeatureExtraction")) remotes::install_github('ohdsi/FeatureExtraction', upgrade = "never"); library(FeatureExtraction)
 if (!require("remotes")) install.packages("remotes"); library(remotes)
 if (!require("stringr")) install.packages("stringr"); library(stringr)
 if (!require("DatabaseConnector")) install.packages("DatabaseConnector"); library(DatabaseConnector)
@@ -10,7 +9,7 @@ if (!require("CirceR")) remotes::install_github('ohdsi/CirceR', upgrade = "never
 # ------------------------------------------------------------------------------
 
 ## uncomment below option to set a custom temporary folder
-options(andromedaTempFolder = "")
+# options(andromedaTempFolder = "")
 
 cdmDatabaseName = ""
 outputDirectory <- ""
@@ -31,7 +30,8 @@ cohortTable <- "dlc_cohorts"
 cohortDirectory <- file.path(getwd(), "cohorts")
 
 # ------------------------------------------------------------------------------
-
+dir.create(file.path(outputDirectory, "dlc_table1_results"))
+outputDirectory <- file.path(outputDirectory, "dlc_table1_results")
 cohortIds <- list(dementia=list(target=11931, outcome=6243),
                 bipolar=list(target=11454, outcome=10461),
                 lungcancer=list(target=11932, outcome=298))
@@ -105,51 +105,55 @@ databaseDetails_dementia <- PatientLevelPrediction::createDatabaseDetails(
   outcomeIds = cohortIds$dementia$outcome
 )
 
-plpData_dementia <- PatientLevelPrediction::getPlpData(
-  databaseDetails = databaseDetails_dementia,
-  covariateSettings = covariateSettings,
-  restrictPlpDataSettings = PatientLevelPrediction::createRestrictPlpDataSettings()
+try(
+  {
+    plpData_dementia <- PatientLevelPrediction::getPlpData(
+      databaseDetails = databaseDetails_dementia,
+      covariateSettings = covariateSettings,
+      restrictPlpDataSettings = PatientLevelPrediction::createRestrictPlpDataSettings()
+    )
+    
+    tableOneCovData <- plpData_dementia$covariateData
+    
+    # dementia
+    dementiaPopulationSettings <- createStudyPopulationSettings(
+      binary = T, 
+      includeAllOutcomes = T, 
+      firstExposureOnly = T, 
+      washoutPeriod = 365, 
+      removeSubjectsWithPriorOutcome = F, 
+      priorOutcomeLookback = 99999, 
+      requireTimeAtRisk = T, 
+      minTimeAtRisk = 1, 
+      riskWindowStart = 1, 
+      startAnchor = 'cohort start', 
+      endAnchor = 'cohort start', 
+      riskWindowEnd = 1825
+    )
+    
+    dementia_population <- PatientLevelPrediction::createStudyPopulation(
+      plpData = plpData_dementia,
+      cohortIds$dementia$outcome,
+      dementiaPopulationSettings
+    )
+    
+    #filter to population
+    filteredTableOneCovData <- tableOneCovData
+    filteredTableOneCovData$covariates <- tableOneCovData$covariates %>%
+      dplyr::filter(rowId %in% !!dementia_population$rowId)
+    attr(filteredTableOneCovData, 'metaData')$populationSize <- nrow(dementia_population)
+    AggregatedtableOneCovData <- FeatureExtraction::aggregateCovariates(filteredTableOneCovData)
+    
+    tableOne <- FeatureExtraction::createTable1(
+      AggregatedtableOneCovData,
+      output = 'one column',
+      showCounts = TRUE,
+      showPercent = TRUE
+    )
+    # 
+    saveRDS(tableOne, file.path(outputDirectory, "dementia.rds"))
+  }
 )
-
-tableOneCovData <- plpData_dementia$covariateData
-
-# dementia
-dementiaPopulationSettings <- createStudyPopulationSettings(
-  binary = T, 
-  includeAllOutcomes = T, 
-  firstExposureOnly = T, 
-  washoutPeriod = 365, 
-  removeSubjectsWithPriorOutcome = F, 
-  priorOutcomeLookback = 99999, 
-  requireTimeAtRisk = T, 
-  minTimeAtRisk = 1, 
-  riskWindowStart = 1, 
-  startAnchor = 'cohort start', 
-  endAnchor = 'cohort start', 
-  riskWindowEnd = 1825
-)
-
-dementia_population <- PatientLevelPrediction::createStudyPopulation(
-  plpData = plpData_dementia,
-  cohortIds$dementia$outcome,
-  dementiaPopulationSettings
-)
-
-#filter to population
-filteredTableOneCovData <- tableOneCovData
-filteredTableOneCovData$covariates <- tableOneCovData$covariates %>%
-  dplyr::filter(rowId %in% !!dementia_population$rowId)
-attr(filteredTableOneCovData, 'metaData')$populationSize <- nrow(dementia_population)
-AggregatedtableOneCovData <- FeatureExtraction::aggregateCovariates(filteredTableOneCovData)
-
-tableOne <- FeatureExtraction::createTable1(
-  AggregatedtableOneCovData,
-  output = 'one column',
-  showCounts = TRUE,
-  showPercent = TRUE
-)
-# 
-saveRDS(tableOne, file.path(outputDirectory, "dementia.rds"))
 
 # bipolar -----------------------------------------------------------------
 
@@ -165,46 +169,51 @@ databaseDetails_bipolar <- PatientLevelPrediction::createDatabaseDetails(
   outcomeIds = cohortIds$bipolar$outcome
 )
 
-plpData_bipolar <- PatientLevelPrediction::getPlpData(
-  databaseDetails = databaseDetails_bipolar,
-  covariateSettings = covariateSettings,
-  restrictPlpDataSettings = PatientLevelPrediction::createRestrictPlpDataSettings()
+try(
+  {
+    plpData_bipolar <- PatientLevelPrediction::getPlpData(
+      databaseDetails = databaseDetails_bipolar,
+      covariateSettings = covariateSettings,
+      restrictPlpDataSettings = PatientLevelPrediction::createRestrictPlpDataSettings()
+    )
+    
+    tableOneCovData <- plpData_bipolar$covariateData
+    
+    bipolarPopulationSettings <- createStudyPopulationSettings(
+      removeSubjectsWithPriorOutcome = T,
+      priorOutcomeLookback = 99999,
+      requireTimeAtRisk = T,
+      minTimeAtRisk = 1,
+      riskWindowStart = 1,
+      startAnchor = 'cohort start',
+      riskWindowEnd = 365,
+      endAnchor = 'cohort start'
+    )
+    
+    bipolar_population <- PatientLevelPrediction::createStudyPopulation(
+      plpData = plpData_bipolar,
+      cohortIds$bipolar$outcome,
+      bipolarPopulationSettings
+    )
+    
+    #filter to population
+    filteredTableOneCovData <- tableOneCovData
+    filteredTableOneCovData$covariates <- tableOneCovData$covariates %>%
+      dplyr::filter(rowId %in% !!bipolar_population$rowId)
+    attr(filteredTableOneCovData, 'metaData')$populationSize <- nrow(bipolar_population)
+    AggregatedtableOneCovData <- FeatureExtraction::aggregateCovariates(filteredTableOneCovData)
+    
+    tableOne <- FeatureExtraction::createTable1(
+      AggregatedtableOneCovData,
+      output = 'one column',
+      showCounts = TRUE,
+      showPercent = TRUE
+    )
+    #
+    saveRDS(tableOne, file.path(outputDirectory, "bipolar.rds"))
+  }
 )
 
-tableOneCovData <- plpData_bipolar$covariateData
-
-bipolarPopulationSettings <- createStudyPopulationSettings(
-  removeSubjectsWithPriorOutcome = T,
-  priorOutcomeLookback = 99999,
-  requireTimeAtRisk = T,
-  minTimeAtRisk = 1,
-  riskWindowStart = 1,
-  startAnchor = 'cohort start',
-  riskWindowEnd = 365,
-  endAnchor = 'cohort start'
-)
-
-bipolar_population <- PatientLevelPrediction::createStudyPopulation(
-  plpData = plpData_bipolar,
-  cohortIds$bipolar$outcome,
-  bipolarPopulationSettings
-)
-
-#filter to population
-filteredTableOneCovData <- tableOneCovData
-filteredTableOneCovData$covariates <- tableOneCovData$covariates %>%
-  dplyr::filter(rowId %in% !!bipolar_population$rowId)
-attr(filteredTableOneCovData, 'metaData')$populationSize <- nrow(bipolar_population)
-AggregatedtableOneCovData <- FeatureExtraction::aggregateCovariates(filteredTableOneCovData)
-
-tableOne <- FeatureExtraction::createTable1(
-  AggregatedtableOneCovData,
-  output = 'one column',
-  showCounts = TRUE,
-  showPercent = TRUE
-)
-#
-saveRDS(tableOne, file.path(outputDirectory, "bipolar.rds"))
 
 # lungcancer -----------------------------------------------------------------
 
@@ -220,44 +229,47 @@ databaseDetails_lungcancer <- PatientLevelPrediction::createDatabaseDetails(
   outcomeIds = cohortIds$lungcancer$outcome
 )
 
-plpData_lungcancer <- PatientLevelPrediction::getPlpData(
-  databaseDetails = databaseDetails_lungcancer,
-  covariateSettings = covariateSettings,
-  restrictPlpDataSettings = PatientLevelPrediction::createRestrictPlpDataSettings()
+try(
+  {
+    plpData_lungcancer <- PatientLevelPrediction::getPlpData(
+      databaseDetails = databaseDetails_lungcancer,
+      covariateSettings = covariateSettings,
+      restrictPlpDataSettings = PatientLevelPrediction::createRestrictPlpDataSettings()
+    )
+    
+    tableOneCovData <- plpData_lungcancer$covariateData
+    
+    lungCancerPopulationSettings <- createStudyPopulationSettings(
+      removeSubjectsWithPriorOutcome = T,
+      priorOutcomeLookback = 99999,
+      requireTimeAtRisk = T,
+      minTimeAtRisk = 1,
+      riskWindowStart = 1,
+      startAnchor = 'cohort start',
+      riskWindowEnd = 1095,
+      endAnchor = 'cohort start'
+    )
+    
+    lungcancer_population <- PatientLevelPrediction::createStudyPopulation(
+      plpData = plpData_lungcancer,
+      cohortIds$lungcancer$outcome,
+      lungCancerPopulationSettings
+    )
+    
+    #filter to population
+    filteredTableOneCovData <- tableOneCovData
+    filteredTableOneCovData$covariates <- tableOneCovData$covariates %>%
+      dplyr::filter(rowId %in% !!lungcancer_population$rowId)
+    attr(filteredTableOneCovData, 'metaData')$populationSize <- nrow(lungcancer_population)
+    AggregatedtableOneCovData <- FeatureExtraction::aggregateCovariates(filteredTableOneCovData)
+    
+    tableOne <- FeatureExtraction::createTable1(
+      AggregatedtableOneCovData,
+      output = 'one column',
+      showCounts = TRUE,
+      showPercent = TRUE
+    )
+    
+    saveRDS(tableOne, file.path(outputDirectory, "lungcancer.rds"))
+  }
 )
-
-tableOneCovData <- plpData_lungcancer$covariateData
-
-lungCancerPopulationSettings <- createStudyPopulationSettings(
-  removeSubjectsWithPriorOutcome = T,
-  priorOutcomeLookback = 99999,
-  requireTimeAtRisk = T,
-  minTimeAtRisk = 1,
-  riskWindowStart = 1,
-  startAnchor = 'cohort start',
-  riskWindowEnd = 1095,
-  endAnchor = 'cohort start'
-)
-
-lungcancer_population <- PatientLevelPrediction::createStudyPopulation(
-  plpData = plpData_lungcancer,
-  cohortIds$lungcancer$outcome,
-  lungCancerPopulationSettings
-)
-
-#filter to population
-filteredTableOneCovData <- tableOneCovData
-filteredTableOneCovData$covariates <- tableOneCovData$covariates %>%
-  dplyr::filter(rowId %in% !!lungcancer_population$rowId)
-attr(filteredTableOneCovData, 'metaData')$populationSize <- nrow(lungcancer_population)
-AggregatedtableOneCovData <- FeatureExtraction::aggregateCovariates(filteredTableOneCovData)
-
-tableOne <- FeatureExtraction::createTable1(
-  AggregatedtableOneCovData,
-  output = 'one column',
-  showCounts = TRUE,
-  showPercent = TRUE
-)
-
-saveRDS(tableOne, file.path(outputDirectory, "lungcancer.rds"))
-
