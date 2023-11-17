@@ -150,7 +150,16 @@ try(
       showCounts = TRUE,
       showPercent = TRUE
     )
-    # 
+    
+    pop <- dementia_population
+    data <- data.frame(
+      c("Population count", "Outcome count", "Median time-at-risk (interquartile range)", "Female", "Male"),
+      c(nrow(pop), sum(pop$outcomeCount), median(pop$timeAtRisk), sum(pop$gender == 8532), sum(pop$gender == 8507)),
+      c(100.0, round(sum(pop$outcomeCount)/nrow(pop)*100, 1), IQR(pop$timeAtRisk), round(sum(pop$gender == 8532)/nrow(pop)*100, 1), round(sum(pop$gender == 8507)/nrow(pop)*100, 1))
+    )
+    names(data) <- names(tableOne)
+    tableOne <- rbind(data, tableOne)
+    
     saveRDS(tableOne, file.path(outputDirectory, "dementia.rds"))
   }
 )
@@ -209,7 +218,16 @@ try(
       showCounts = TRUE,
       showPercent = TRUE
     )
-    #
+    
+    pop <- bipolar_population
+    data <- data.frame(
+      c("Population count", "Outcome count", "Median time-at-risk (interquartile range)", "Female", "Male"),
+      c(nrow(pop), sum(pop$outcomeCount), median(pop$timeAtRisk), sum(pop$gender == 8532), sum(pop$gender == 8507)),
+      c(100.0, round(sum(pop$outcomeCount)/nrow(pop)*100, 1), IQR(pop$timeAtRisk), round(sum(pop$gender == 8532)/nrow(pop)*100, 1), round(sum(pop$gender == 8507)/nrow(pop)*100, 1))
+    )
+    names(data) <- names(tableOne)
+    tableOne <- rbind(data, tableOne)
+    
     saveRDS(tableOne, file.path(outputDirectory, "bipolar.rds"))
   }
 )
@@ -269,6 +287,15 @@ try(
       showCounts = TRUE,
       showPercent = TRUE
     )
+    
+    pop <- lungcancer_population
+    data <- data.frame(
+      c("Population count", "Outcome count", "Median time-at-risk (interquartile range)", "Female", "Male"),
+      c(nrow(pop), sum(pop$outcomeCount), median(pop$timeAtRisk), sum(pop$gender == 8532), sum(pop$gender == 8507)),
+      c(100.0, round(sum(pop$outcomeCount)/nrow(pop)*100, 1), IQR(pop$timeAtRisk), round(sum(pop$gender == 8532)/nrow(pop)*100, 1), round(sum(pop$gender == 8507)/nrow(pop)*100, 1))
+    )
+    names(data) <- names(tableOne)
+    tableOne <- rbind(data, tableOne)
     
     saveRDS(tableOne, file.path(outputDirectory, "lungcancer.rds"))
   }
