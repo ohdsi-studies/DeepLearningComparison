@@ -11,25 +11,14 @@ options(renv.config.mran.enabled = FALSE)
 # MODEL TRANSFER ----------------------------------------------------------
 
 
-source('https://raw.githubusercontent.com/OHDSI/ModelTransferModule/v0.0.7/SettingsFunctions.R')
+source('https://raw.githubusercontent.com/OHDSI/ModelTransferModule/v0.0.8/SettingsFunctions.R')
 
 s3Settings <- tibble(modelZipLocation = character(), bucket = character(), region = character()) |>
-  add_row(modelZipLocation="lungcancer/ipci/lr.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
-  add_row(modelZipLocation="lungcancer/ipci/gb.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
-  add_row(modelZipLocation="lungcancer/ipci/rn.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
-  add_row(modelZipLocation="lungcancer/ipci/tf.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
-  add_row(modelZipLocation="lungcancer/opehr/lr.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
-  add_row(modelZipLocation="lungcancer/opehr/gb.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
-  add_row(modelZipLocation="lungcancer/opehr/rn.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
-  add_row(modelZipLocation="lungcancer/opehr/tf.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
-  add_row(modelZipLocation="lungcancer/opses/lr.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
-  add_row(modelZipLocation="lungcancer/opses/gb.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
-  add_row(modelZipLocation="lungcancer/opses/rn.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
-  add_row(modelZipLocation="lungcancer/opses/tf.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
-  add_row(modelZipLocation="lungcancer/ausom/lr.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
-  add_row(modelZipLocation="lungcancer/ausom/gb.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
-  add_row(modelZipLocation="lungcancer/ausom/rn.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
-  add_row(modelZipLocation="lungcancer/ausom/tf.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1")
+  add_row(modelZipLocation="model/conv-opses-a1.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="model/conv-opses-a2.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="model/conv-opehr-a1.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="model/conv-opehr-a2.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1")
+
   
 modelTransferModuleSpecs <- createModelTransferModuleSpecifications(
   s3Settings = s3Settings

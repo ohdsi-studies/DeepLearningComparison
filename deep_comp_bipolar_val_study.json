@@ -19,16 +19,16 @@
   "moduleSpecifications": [
     {
       "module": "ModelTransferModule",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "remoteRepo": "github.com",
       "remoteUsername": "ohdsi",
       "settings": {
         "s3Settings": {
-          "modelZipLocation": ["bipolar/ipci/lr.zip", "bipolar/ipci/gb.zip", "bipolar/ipci/rn.zip", "bipolar/ipci/tf.zip", "bipolar/opehr/lr.zip", "bipolar/opehr/gb.zip", "bipolar/opehr/rn.zip", "bipolar/opehr/tf.zip", "bipolar/opses/lr.zip", "bipolar/opses/gb.zip", "bipolar/opses/rn.zip", "bipolar/opses/tf.zip", "bipolar/ausom/lr.zip", "bipolar/ausom/gb.zip", "bipolar/ausom/rn.zip", "bipolar/ausom/tf.zip"],
-          "bucket": ["s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/"],
-          "region": ["eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1"],
+          "modelZipLocation": ["model/conv-opses-a3.zip", "model/conv-opses-a4.zip", "model/conv-opehr-a3.zip", "model/conv-opehr-a4.zip"],
+          "bucket": ["s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/"],
+          "region": ["eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1"],
           "attr_class": ["tbl_df", "tbl", "data.frame"],
-          "attr_row.names": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+          "attr_row.names": [1, 2, 3, 4]
         },
         "githubSettings": null,
         "localFileSettings": null
@@ -48,7 +48,7 @@
     },
     {
       "module": "PatientLevelPredictionValidationModule",
-      "version": "0.0.8",
+      "version": "0.0.9",
       "remoteRepo": "github.com",
       "remoteUsername": "ohdsi",
       "settings": [
