@@ -14,10 +14,10 @@ options(renv.config.mran.enabled = FALSE)
 source('https://raw.githubusercontent.com/OHDSI/ModelTransferModule/v0.0.8/SettingsFunctions.R')
 
 s3Settings <- tibble(modelZipLocation = character(), bucket = character(), region = character()) |>
-  add_row(modelZipLocation="model/conv-opses-a3.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
-  add_row(modelZipLocation="model/conv-opses-a4.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
-  add_row(modelZipLocation="model/conv-opehr-a3.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
-  add_row(modelZipLocation="model/conv-opehr-a4.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1")
+  add_row(modelZipLocation="models/conv-opses-a3.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="models/conv-opses-a4.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="models/conv-opehr-a3.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="models/conv-opehr-a4.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1")
 
 
 modelTransferModuleSpecs <- createModelTransferModuleSpecifications(

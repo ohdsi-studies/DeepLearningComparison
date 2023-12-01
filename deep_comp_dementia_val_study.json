@@ -19,16 +19,16 @@
   "moduleSpecifications": [
     {
       "module": "ModelTransferModule",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "remoteRepo": "github.com",
       "remoteUsername": "ohdsi",
       "settings": {
         "s3Settings": {
-          "modelZipLocation": ["dementia/ipci/lr.zip", "dementia/ipci/gb.zip", "dementia/ipci/rn.zip", "dementia/ipci/tf.zip", "dementia/opehr/lr.zip", "dementia/opehr/gb.zip", "dementia/opehr/rn.zip", "dementia/opehr/tf.zip", "dementia/opses/lr.zip", "dementia/opses/gb.zip", "dementia/opses/rn.zip", "dementia/opses/tf.zip", "dementia/ausom/lr.zip", "dementia/ausom/gb.zip", "dementia/ausom/rn.zip", "dementia/ausom/tf.zip"],
-          "bucket": ["s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/"],
-          "region": ["eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1"],
+          "modelZipLocation": ["models/conv-opses-a5.zip", "models/conv-opses-a6.zip", "models/conv-opehr-a5.zip", "models/conv-opehr-a6.zip"],
+          "bucket": ["s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/"],
+          "region": ["eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1"],
           "attr_class": ["tbl_df", "tbl", "data.frame"],
-          "attr_row.names": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+          "attr_row.names": [1, 2, 3, 4]
         },
         "githubSettings": null,
         "localFileSettings": null
@@ -48,7 +48,7 @@
     },
     {
       "module": "PatientLevelPredictionValidationModule",
-      "version": "0.0.8",
+      "version": "0.0.9",
       "remoteRepo": "github.com",
       "remoteUsername": "ohdsi",
       "settings": [

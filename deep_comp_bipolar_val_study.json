@@ -24,7 +24,7 @@
       "remoteUsername": "ohdsi",
       "settings": {
         "s3Settings": {
-          "modelZipLocation": ["model/conv-opses-a3.zip", "model/conv-opses-a4.zip", "model/conv-opehr-a3.zip", "model/conv-opehr-a4.zip"],
+          "modelZipLocation": ["models/conv-opses-a3.zip", "models/conv-opses-a4.zip", "models/conv-opehr-a3.zip", "models/conv-opehr-a4.zip"],
           "bucket": ["s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/"],
           "region": ["eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1"],
           "attr_class": ["tbl_df", "tbl", "data.frame"],
