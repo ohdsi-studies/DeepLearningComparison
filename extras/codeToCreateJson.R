@@ -44,7 +44,7 @@ createCohortSharedResource <- function(cohortDefinitionSet) {
 # COHORT GENERATION SETTINGS
 
 # source the cohort generator settings function
-source("https://raw.githubusercontent.com/OHDSI/CohortGeneratorModule/v0.1.0/SettingsFunctions.R")
+source("https://raw.githubusercontent.com/OHDSI/CohortGeneratorModule/v0.2.1/SettingsFunctions.R")
 # this loads a function called createCohortGeneratorModuleSpecifications that takes as
 # input incremental (boolean) and generateStats (boolean)
 
@@ -69,7 +69,7 @@ covariateSettings <- FeatureExtraction::createCovariateSettings(
 )
 
 restrictPlpDataSettings <- createRestrictPlpDataSettings(
-  sampleSize = 1e6,
+  sampleSize = NULL,
 )
 
 splitSettings <- createDefaultSplitSetting(
@@ -148,11 +148,10 @@ gradientBoostingModelSettings <- setGradientBoostingMachine(
   seed = 1e3
 )
 
-
 getDevice <- function() {
   dev <- Sys.getenv("deepPLPDevice")
   if(dev == "") {
-    if (torch::cuda_is_available()) dev<-"cuda:0" else dev<-"cpu"
+    if (torch$cuda$is_available()) dev<-"cuda:0" else dev<-"cpu"
   }
   dev
 }
@@ -171,7 +170,7 @@ resNetModelSettings <- setResNet(
     weightDecay = c(1e-6, 1e-3),
     batchSize=5*2^10,
     learningRate = "auto",
-    device = getDevice,
+    device = "cuda:0",
     epochs=5e1,
     seed=1e3,
     earlyStopping = list(useEarlyStopping=TRUE,
@@ -193,9 +192,9 @@ transformerModelSettings <- setTransformer(
   randomSampleSeed = 123,
   estimatorSettings = setEstimator(
     weightDecay = c(1e-6, 1e-3),
-    batchSize=2^10,
+    batchSize=2^9,
     learningRate = "auto",
-    device = getDevice,
+    device = "cuda:0",
     epochs=5e1,
     seed=1e3,
     earlyStopping = list(useEarlyStopping=TRUE,
@@ -344,8 +343,8 @@ for (modelSetting in classicModelSettings) {
 
 
 # source the latest PatientLevelPredictionModule SettingsFunctions.R
-source("https://raw.githubusercontent.com/OHDSI/DeepPatientLevelPredictionModule/v0.0.8/SettingsFunctions.R")
-source("https://raw.githubusercontent.com/OHDSI/PatientLevelPredictionModule/v0.1.0/SettingsFunctions.R")
+source("https://raw.githubusercontent.com/OHDSI/DeepPatientLevelPredictionModule/v0.2.0/SettingsFunctions.R")
+source("https://raw.githubusercontent.com/OHDSI/PatientLevelPredictionModule/v0.2.0/SettingsFunctions.R")
 
 # this will load a function called createPatientLevelPredictionModuleSpecifications
 # that takes as input a modelDesignList
@@ -365,4 +364,4 @@ analysisSpecifications <- createEmptyAnalysisSpecificiations() |>
   addModuleSpecifications(deepPatientLevelPredictionModuleSpecifications)
 
 # SAVING TO SHARE
-ParallelLogger::saveSettingsToJson(analysisSpecifications, 'deep_comp_study.json')
+ParallelLogger::saveSettingsToJson(analysisSpecifications, 'deep_comp_cuda0_study.json')
