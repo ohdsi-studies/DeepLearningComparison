@@ -13,9 +13,13 @@
 -   Publications: **-**
 -   Results explorer: **-**
 
-A comparison of different deep learning models for three prediciton tasks previously studied: predicitng 3-year risk of lung cancer in low risk population, predicting 10-year risk of dementia and predicitng 1-year risk bipolar in MDD.
+A comparison of different deep learning models for three prediction tasks previously studied: predicting 3-year risk of lung cancer in low risk population, predicting 10-year risk of dementia and predicting 1-year risk bipolar in MDD.
 
 This study will use Strategus (v0.1.0) and requires: - OMOP CDM database - Java for the JDBC connection - R (plus R studio is recommended) - The R package keyring to be set up
+
+Note that by default the study will run on cuda:0. If you need to run on a different gpu in your system you can specify the environment variable CUDA_VISIBLE_DEVICES to the required gpu before execution.
+
+We also provide a docker container, which is by far the easiest way to run the study if your environment supports it. For more information see readme in docker subfolder.
 
 # Code To Run
 
