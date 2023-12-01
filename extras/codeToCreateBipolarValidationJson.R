@@ -17,8 +17,19 @@ s3Settings <- tibble(modelZipLocation = character(), bucket = character(), regio
   add_row(modelZipLocation="models/conv-opses-a3.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
   add_row(modelZipLocation="models/conv-opses-a4.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
   add_row(modelZipLocation="models/conv-opehr-a3.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
-  add_row(modelZipLocation="models/conv-opehr-a4.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1")
-
+  add_row(modelZipLocation="models/conv-opehr-a4.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="models/conv-ipci-a3.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="models/conv-ipci-a4.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="models/conv-ausom-a3.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="models/conv-ausom-a4.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="models/deep-opses-a3.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="models/deep-opses-a4.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="models/deep-opehr-a3.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="models/deep-opehr-a4.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="models/deep-ipci-a3.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="models/deep-ipci-a4.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="models/deep-ausom-a3.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
+  add_row(modelZipLocation="models/deep-ausom-a4.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1")
 
 modelTransferModuleSpecs <- createModelTransferModuleSpecifications(
   s3Settings = s3Settings

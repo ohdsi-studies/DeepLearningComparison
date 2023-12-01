@@ -24,11 +24,11 @@
       "remoteUsername": "ohdsi",
       "settings": {
         "s3Settings": {
-          "modelZipLocation": ["models/conv-opses-a1.zip", "models/conv-opses-a2.zip", "models/conv-opehr-a1.zip", "models/conv-opehr-a2.zip"],
-          "bucket": ["s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/"],
-          "region": ["eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1"],
+          "modelZipLocation": ["models/conv-opses-a1.zip", "models/conv-opses-a2.zip", "models/conv-opehr-a1.zip", "models/conv-opehr-a2.zip", "models/conv-ipci-a1.zip", "models/conv-ipci-a2.zip", "models/conv-ausom-a1.zip", "models/conv-ausom-a2.zip", "models/deep-opses-a1.zip", "models/deep-opses-a2.zip", "models/deep-opehr-a1.zip", "models/deep-opehr-a2.zip", "models/deep-ipci-a1.zip", "models/deep-ipci-a2.zip", "models/deep-ausom-a1.zip", "models/deep-ausom-a2.zip"],
+          "bucket": ["s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/", "s3://ohdsi-dlc/"],
+          "region": ["eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1", "eu-west-1"],
           "attr_class": ["tbl_df", "tbl", "data.frame"],
-          "attr_row.names": [1, 2, 3, 4]
+          "attr_row.names": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
         },
         "githubSettings": null,
         "localFileSettings": null
@@ -48,7 +48,7 @@
     },
     {
       "module": "PatientLevelPredictionValidationModule",
-      "version": "0.0.10",
+      "version": "0.0.11",
       "remoteRepo": "github.com",
       "remoteUsername": "ohdsi",
       "settings": [
