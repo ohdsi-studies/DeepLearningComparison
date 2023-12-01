@@ -1,5 +1,5 @@
-# Install latest Strategus
-# remotes::install_github("ohdsi/Strategus")
+# Install Strategus
+# remotes::install_github("ohdsi/Strategus@v0.1.0")
 
 # load Strategus
 library(Strategus)
@@ -14,7 +14,6 @@ connectionDetailsReference <- paste0("DeepLearningComparison_", database)
 
 # where to save the output
 outputFolder <- "/output/"
-
 
 connectionDetails <- DatabaseConnector::createConnectionDetails(
   dbms = Sys.getenv('DBMS'), 

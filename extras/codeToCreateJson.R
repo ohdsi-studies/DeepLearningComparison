@@ -1,7 +1,7 @@
 
 if (!require("remotes")) install.packages("remotes"); library(remotes)
 if (!require("dplyr")) install.packages("dplyr"); library(dplyr)
-if (!require("Strategus")) remotes::install_github('ohdsi/Strategus', upgrade = "never"); library(Strategus)
+if (!require("Strategus")) remotes::install_github('ohdsi/Strategus@v0.1.0', upgrade = "never"); library(Strategus)
 if (!require("PatientLevelPrediction")) remotes::install_github('ohdsi/PatientLevelPrediction', upgrade = "never"); library(PatientLevelPrediction)
 if (!require("DeepPatientLevelPrediction")) remotes::install_github('ohdsi/DeepPatientLevelPrediction', upgrade = "never"); library(DeepPatientLevelPrediction)
 
@@ -170,7 +170,7 @@ resNetModelSettings <- setResNet(
     weightDecay = c(1e-6, 1e-3),
     batchSize=5*2^10,
     learningRate = "auto",
-    device = "cuda:0",
+    device = getDevice,
     epochs=5e1,
     seed=1e3,
     earlyStopping = list(useEarlyStopping=TRUE,
@@ -194,7 +194,7 @@ transformerModelSettings <- setTransformer(
     weightDecay = c(1e-6, 1e-3),
     batchSize=2^9,
     learningRate = "auto",
-    device = "cuda:0",
+    device = getDevice,
     epochs=5e1,
     seed=1e3,
     earlyStopping = list(useEarlyStopping=TRUE,
@@ -344,7 +344,7 @@ for (modelSetting in classicModelSettings) {
 
 # source the latest PatientLevelPredictionModule SettingsFunctions.R
 source("https://raw.githubusercontent.com/OHDSI/DeepPatientLevelPredictionModule/v0.2.0/SettingsFunctions.R")
-source("https://raw.githubusercontent.com/OHDSI/PatientLevelPredictionModule/v0.2.0/SettingsFunctions.R")
+source("https://raw.githubusercontent.com/OHDSI/PatientLevelPredictionModule/v0.2.1/SettingsFunctions.R")
 
 # this will load a function called createPatientLevelPredictionModuleSpecifications
 # that takes as input a modelDesignList
@@ -364,4 +364,4 @@ analysisSpecifications <- createEmptyAnalysisSpecificiations() |>
   addModuleSpecifications(deepPatientLevelPredictionModuleSpecifications)
 
 # SAVING TO SHARE
-ParallelLogger::saveSettingsToJson(analysisSpecifications, 'deep_comp_cuda0_study.json')
+ParallelLogger::saveSettingsToJson(analysisSpecifications, 'deep_comp_study.json')
