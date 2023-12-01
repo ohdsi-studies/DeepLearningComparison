@@ -19,7 +19,7 @@
   "moduleSpecifications": [
     {
       "module": "ModelTransferModule",
-      "version": "0.0.8",
+      "version": "0.0.10",
       "remoteRepo": "github.com",
       "remoteUsername": "ohdsi",
       "settings": {
@@ -48,7 +48,7 @@
     },
     {
       "module": "PatientLevelPredictionValidationModule",
-      "version": "0.0.9",
+      "version": "0.0.10",
       "remoteRepo": "github.com",
       "remoteUsername": "ohdsi",
       "settings": [

@@ -11,7 +11,7 @@ options(renv.config.mran.enabled = FALSE)
 # MODEL TRANSFER ----------------------------------------------------------
 
 
-source('https://raw.githubusercontent.com/OHDSI/ModelTransferModule/v0.0.8/SettingsFunctions.R')
+source('https://raw.githubusercontent.com/OHDSI/ModelTransferModule/v0.0.10/SettingsFunctions.R')
 
 s3Settings <- tibble(modelZipLocation = character(), bucket = character(), region = character()) |>
   add_row(modelZipLocation="models/conv-opses-a5.zip", bucket="s3://ohdsi-dlc/", region="eu-west-1") |>
