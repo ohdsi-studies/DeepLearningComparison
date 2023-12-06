@@ -87,6 +87,48 @@
         }
       ],
       "attr_class": ["PatientLevelPredictionValidationModuleSpecifications", "ModuleSpecifications"]
+    },
+    {
+      "module": "DeepPatientLevelPredictionValidationModule",
+      "version": "0.0.1",
+      "remoteRepo": "github.com",
+      "remoteUsername": "ohdsi",
+      "settings": [
+        {
+          "targetId": null,
+          "oucomeId": null,
+          "restrictPlpDataSettings": {
+            "studyStartDate": "",
+            "studyEndDate": "",
+            "firstExposureOnly": false,
+            "washoutPeriod": 0,
+            "sampleSize": null,
+            "attr_class": "restrictPlpDataSettings"
+          },
+          "validationSettings": {
+            "recalibrate": null,
+            "runCovariateSummary": true,
+            "attr_class": "validationSettings"
+          },
+          "populationSettings": {
+            "binary": true,
+            "includeAllOutcomes": true,
+            "firstExposureOnly": false,
+            "washoutPeriod": 0,
+            "removeSubjectsWithPriorOutcome": true,
+            "priorOutcomeLookback": 99999,
+            "requireTimeAtRisk": true,
+            "minTimeAtRisk": 1,
+            "riskWindowStart": 1,
+            "startAnchor": "cohort start",
+            "riskWindowEnd": 1095,
+            "endAnchor": "cohort start",
+            "restrictTarToCohortEnd": false,
+            "attr_class": "populationSettings"
+          }
+        }
+      ],
+      "attr_class": ["PatientLevelPredictionValidationModuleSpecifications", "ModuleSpecifications"]
     }
   ],
   "attr_class": "AnalysisSpecifications"

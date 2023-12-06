@@ -177,6 +177,7 @@ lungCancerPopulationSettings <- createStudyPopulationSettings(
 )
 
 source('https://raw.githubusercontent.com/OHDSI/PatientLevelPredictionValidationModule/main/SettingsFunctions.R')
+source('https://raw.githubusercontent.com/OHDSI/DeepPatientLevelPredictionValidationModule/main/SettingsFunctions.R')
 
 validationComponentsList <- list(
   list(
@@ -195,11 +196,16 @@ predictionValidationModuleSpecifications <- createPatientLevelPredictionValidati
   validationComponentsList = validationComponentsList
 )
 
+predictionValidationModuleSpecificationsDeep <- createDeepPatientLevelPredictionValidationModuleSpecifications(
+  validationComponentsList = validationComponentsList
+)
+
 analysisSpecifications <- createEmptyAnalysisSpecificiations() |>
   addModuleSpecifications(modelTransferModuleSpecs) |>
   addSharedResources(createCohortSharedResource(cohortDefinitions)) |>
   addModuleSpecifications(cohortGeneratorModuleSpecifications) |>
-  addModuleSpecifications(predictionValidationModuleSpecifications)
+  addModuleSpecifications(predictionValidationModuleSpecifications) |>
+  addModuleSpecifications(predictionValidationModuleSpecificationsDeep)
 
 # SAVING TO SHARE
 ParallelLogger::saveSettingsToJson(analysisSpecifications, 'deep_comp_lungcancer_val_study.json')
