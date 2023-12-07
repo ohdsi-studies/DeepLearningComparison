@@ -37,7 +37,7 @@
     },
     {
       "module": "CohortGeneratorModule",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "remoteRepo": "github.com",
       "remoteUsername": "ohdsi",
       "settings": {
@@ -90,7 +90,7 @@
     },
     {
       "module": "DeepPatientLevelPredictionValidationModule",
-      "version": "0.0.1",
+      "version": "0.0.3",
       "remoteRepo": "github.com",
       "remoteUsername": "ohdsi",
       "settings": [
