@@ -7,14 +7,15 @@ library(Strategus)
 # Inputs to run (edit these for your CDM):
 # ========================================= #
 
-database <- Sys.getenv("DATABASE") # your database name
+database <- Sys.getenv("DATABASE") # your database name 
 
 # reference for the connection used by Strategus
 connectionDetailsReference <- paste0("DeepLearningComparison_", database)
 
-# where to save the output
+# where to save the output - a directory in your environment
 outputFolder <- "/output/"
 
+# fill in your connection details and path to driver
 connectionDetails <- DatabaseConnector::createConnectionDetails(
   dbms = Sys.getenv('DBMS'), 
   server = Sys.getenv("DATABASE_SERVER"), 
@@ -27,7 +28,7 @@ connectionDetails <- DatabaseConnector::createConnectionDetails(
 # A schema with write access to store cohort tables
 workDatabaseSchema <- Sys.getenv("WORK_SCHEMA")
 
-# name of cohort table for study
+# name of cohort table that will be created for study
 cohortTable <- Sys.getenv("STRATEGUS_COHORT_TABLE")
 
 # schema where the cdm data is
@@ -38,10 +39,11 @@ minCellCount <- 5
 
 
 # Location to Strategus modules
+# If you've ran Strategus studies before this directory should already exist.
 # Note: this environmental variable should be set once for each compute node
 Sys.setenv("INSTANTIATED_MODULES_FOLDER" = '/modules/')
 
- 
+
 # =========== END OF INPUTS ========== #
 
 Strategus::storeConnectionDetails(
@@ -66,5 +68,5 @@ Strategus::execute(
   analysisSpecifications = analysisSpecifications,
   executionSettings = executionSettings,
   executionScriptFolder = file.path(outputFolder, "strategusExecution"),
-  restart=F
+  restart = F
 )

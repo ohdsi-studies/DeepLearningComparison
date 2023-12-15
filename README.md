@@ -9,7 +9,7 @@
 -   Study lead forums tag: [**[Lead tag]**](https://forums.ohdsi.org/u/%5BLead%20tag%5D)
 -   Study start date: **-**
 -   Study end date: **-**
--   Protocol: **[Protocol](StudyProtocol.pdf)**
+-   Protocol: [**Protocol**](StudyProtocol.pdf)
 -   Publications: **-**
 -   Results explorer: **-**
 
@@ -23,58 +23,79 @@ We also provide a docker container, which is by far the easiest way to run the s
 
 # Code To Run
 
+To run the study execute the following code, make sure you adjust the inputs to your environment. This snippet is as well stored in codeToRun.R
+
 ```{r}
-# Install latest Strategus
-remotes::install_github("ohdsi/Strategus@v0.1.0")
+# Install Strategus if needed
+# remotes::install_github("ohdsi/Strategus@v0.1.0")
 
 # load Strategus
 library(Strategus)
-library(dplyr)
 
 # Inputs to run (edit these for your CDM):
 # ========================================= #
 
-database <- 'databaseName'
-connectionDetailsReference <- "databaseName"
-outputFolder <- '/Users/username/Documents/saveLocation'
-cdmDatabaseSchema <- keyring::key_get('cdmDatabaseSchema', database)
-workDatabaseSchema <- "schema where you can read/write to"
-cohortTable <- "plp_pca"
-  
+database <- Sys.getenv("DATABASE") # your database name 
+
+# reference for the connection used by Strategus
+connectionDetailsReference <- paste0("DeepLearningComparison_", database)
+
+# where to save the output - a directory in your environment
+outputFolder <- "/output/"
+
+# fill in your connection details and path to driver
 connectionDetails <- DatabaseConnector::createConnectionDetails(
-  dbms = keyring::key_get('dbms', database),
-  server = keyring::key_get('server', database),
-  user = keyring::key_get('user', database),
-  password = keyring::key_get('pw', database),
-  port = keyring::key_get('port', database)
+  dbms = Sys.getenv('DBMS'), 
+  server = Sys.getenv("DATABASE_SERVER"), 
+  user = Sys.getenv("DATABASE_USER"),
+  password = Sys.getenv("DATABASE_PASSWORD"),
+  port = Sys.getenv("DATABASE_PORT"),
+  pathToDriver = "/database_drivers"
 )
 
-# end inputs
+# A schema with write access to store cohort tables
+workDatabaseSchema <- Sys.getenv("WORK_SCHEMA")
 
-storeConnectionDetails(connectionDetails = connectionDetails,
-                       connectionDetailsReference = connectionDetailsReference)
+# name of cohort table that will be created for study
+cohortTable <- Sys.getenv("STRATEGUS_COHORT_TABLE")
 
-executionSettings <- createCdmExecutionSettings(
+# schema where the cdm data is
+cdmDatabaseSchema <- Sys.getenv("CDM_SCHEMA")
+
+# Aggregated statistics with cell count less than this are removed before sharing results.
+minCellCount <- 5
+
+
+# Location to Strategus modules
+# If you've ran Strategus studies before this directory should already exist.
+# Note: this environmental variable should be set once for each compute node
+Sys.setenv("INSTANTIATED_MODULES_FOLDER" = '/modules/')
+
+ 
+# =========== END OF INPUTS ========== #
+
+Strategus::storeConnectionDetails(
+  connectionDetails = connectionDetails,
+  connectionDetailsReference = connectionDetailsReference
+)
+
+executionSettings <- Strategus::createCdmExecutionSettings(
   connectionDetailsReference = connectionDetailsReference,
   workDatabaseSchema = workDatabaseSchema,
   cdmDatabaseSchema = cdmDatabaseSchema,
   cohortTableNames = CohortGenerator::getCohortTableNames(cohortTable = cohortTable),
   workFolder = file.path(outputFolder, "strategusWork"),
   resultsFolder = file.path(outputFolder, "strategusOutput"),
-  minCellCount = 5
+  minCellCount = minCellCount
 )
 
-# Note: this environmental variable should be set once for each compute node
-Sys.setenv("INSTANTIATED_MODULES_FOLDER" = file.path(outputFolder,"StrategusInstantiatedModules"))
+json <- paste(readLines('./study_execution_jsons/deep_comp_study.json'), collapse = '\n')
+analysisSpecifications <- ParallelLogger::convertJsonToSettings(json)
 
-url <- "https://raw.githubusercontent.com/ohdsi-studies/DeepLearningComparison/master/deep_comp_study.json"
-json <- readLines(file(url))
-json2 <- paste(json, collaplse = '\n')
-analysisSpecifications <- ParallelLogger::convertJsonToSettings(json2)
-
-execute(
+Strategus::execute(
   analysisSpecifications = analysisSpecifications,
   executionSettings = executionSettings,
-  executionScriptFolder = file.path(outputFolder,"strategusExecution")
+  executionScriptFolder = file.path(outputFolder, "strategusExecution"),
+  restart = F
 )
 ```
