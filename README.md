@@ -5,11 +5,11 @@
 -   Analytics use case(s): **Patient-Level Prediction**
 -   Study type: \*\*Methods Research\*
 -   Tags: **Deep Learning**
--   Study lead: **-**
+-   Study lead: **Chungsoo Kim, Henrik John, Jenna Reps and Egill Fridgeirsson**
 -   Study lead forums tag: [**[Lead tag]**](https://forums.ohdsi.org/u/%5BLead%20tag%5D)
 -   Study start date: **-**
 -   Study end date: **-**
--   Protocol: **-**
+-   Protocol: **[Protocol](StudyProtocol.pdf)**
 -   Publications: **-**
 -   Results explorer: **-**
 
