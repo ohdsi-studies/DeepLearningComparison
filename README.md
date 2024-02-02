@@ -1,15 +1,16 @@
-# Deep Learning Comparison
+Deep Learning Comparison
+========================
 
 <img src="https://img.shields.io/badge/Study%20Status-Repo%20Created-lightgray.svg" alt="Study Status: Repo Created"/>
 
 -   Analytics use case(s): **Patient-Level Prediction**
--   Study type: \*\*Methods Research\*
+-   Study type: **Methods Research**
 -   Tags: **Deep Learning**
 -   Study lead: **Chungsoo Kim, Henrik John, Jenna Reps and Egill Fridgeirsson**
--   Study lead forums tag: [**[Lead tag]**](https://forums.ohdsi.org/u/%5BLead%20tag%5D)
+-   Study lead forums tag: **-**
 -   Study start date: **-**
 -   Study end date: **-**
--   Protocol: [**Protocol**](StudyProtocol.pdf)
+-   Protocol: **[Protocol](StudyProtocol.pdf)**
 -   Publications: **-**
 -   Results explorer: **-**
 
