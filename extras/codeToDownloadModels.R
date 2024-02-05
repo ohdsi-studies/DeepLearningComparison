@@ -65,8 +65,8 @@ getModelsFromS3 <- function(
             
             # Download the file from S3
             aws.s3::save_object(obj, bucket, file = local_file_path)
-            ParallelLogger::logInfo(paste0("Downloaded: ", obj, " to ", local_file_path, "\n"))
           }
+          ParallelLogger::logInfo(paste0("Downloaded: ", analysis, " to ", saveToLoc))
         }
       } else{
         ParallelLogger::logInfo(paste0("No ",s3Settings$modelZipLocation[i]," in bucket ", s3Settings$bucket[i], " in region ", s3Settings$region[i] ))
