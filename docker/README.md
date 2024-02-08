@@ -24,7 +24,9 @@ CDM_SCHEMA=cdm_schema
 
 ### Run Table 1 Analysis
 Download the latest version of the Table 1 Docker container.
-```docker pull ohdsi/deeplearningcomparison:table1_latest```
+```
+docker pull ohdsi/deeplearningcomparison:table1_latest
+```
 
 To run the Table 1 Docker container, replace `/host/output/folder` with your desired output directory path, and `/host/secret/folder/secrets.env` with the path to your `secrets.env` file.
 ```
