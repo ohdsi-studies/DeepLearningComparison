@@ -1,0 +1,8 @@
+install.packages("dplyr")
+install.packages("remotes")
+install.packages("ParallelLogger")
+install.packages("DatabaseConnector")
+install.packages("stringr")
+remotes::install_github('ohdsi/PatientLevelPrediction@v6.3.4')
+remotes::install_github('ohdsi/CirceR')
+remotes::install_github('ohdsi/CohortGenerator')

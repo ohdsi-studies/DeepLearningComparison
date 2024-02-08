@@ -1,33 +1,36 @@
 
-if (!require("remotes")) install.packages("remotes"); library(remotes)
-if (!require("stringr")) install.packages("stringr"); library(stringr)
-if (!require("DatabaseConnector")) install.packages("DatabaseConnector"); library(DatabaseConnector)
-if (!require("PatientLevelPrediction")) remotes::install_github('ohdsi/PatientLevelPrediction', upgrade = "never"); library(PatientLevelPrediction)
-if (!require("CohortGenerator")) remotes::install_github('ohdsi/CohortGenerator', upgrade = "never"); library(CohortGenerator)
-if (!require("CirceR")) remotes::install_github('ohdsi/CirceR', upgrade = "never"); library(CirceR)
+library(remotes)
+library(stringr)
+library(DatabaseConnector)
+library(PatientLevelPrediction)
+library(CohortGenerator)
+library(CirceR)
 
 # ------------------------------------------------------------------------------
 
 ## uncomment below option to set a custom temporary folder
 # options(andromedaTempFolder = "")
 
-cdmDatabaseName = ""
-outputDirectory <- ""
+minCellCount <- as.numeric(Sys.getenv('MIN_CELL_COUNT'))
+cdmDatabaseName = Sys.getenv("DATABASE")
+outputDirectory <- "/output/"
 
+# fill in your connection details and path to driver
 connectionDetails <- DatabaseConnector::createConnectionDetails(
-  dbms = "",
-  server = "",
-  port = 0000,
-  user = "",
-  password = "",
+  dbms = Sys.getenv('DBMS'), 
+  server = Sys.getenv("DATABASE_SERVER"), 
+  user = Sys.getenv("DATABASE_USER"),
+  password = Sys.getenv("DATABASE_PASSWORD"),
+  port = Sys.getenv("DATABASE_PORT"),
+  pathToDriver = "/database_drivers"
 )
 
-cdmDatabaseSchema <- ""
-cohortDatabaseSchema <- ""
-cohortTable <- "dlc_cohorts"
+cdmDatabaseSchema <- Sys.getenv("CDM_SCHEMA")
+cohortDatabaseSchema <- Sys.getenv("WORK_SCHEMA")
+cohortTable <- Sys.getenv("TABLE1_COHORT_TABLE")
 
 # ensure this file path points to the cohorts folder in DeepLearningComparison
-cohortDirectory <- file.path(getwd(), "cohorts")
+cohortDirectory <- "/project/cohorts" # file.path(getwd(), "cohorts")
 
 # ------------------------------------------------------------------------------
 dir.create(file.path(outputDirectory, "dlc_table1_results"))
@@ -151,15 +154,33 @@ try(
       showPercent = TRUE
     )
     
+    # handle min cell count
+    mask <- as.numeric(gsub(",", "", tableOne$Count)) < minCellCount
+    mask[is.na(mask)] <- FALSE
+    tableOne[[2]] <- ifelse(mask, paste0("<", minCellCount), tableOne[[2]])
+    tableOne[[3]] <- ifelse(mask, "-", tableOne[[3]])
+    
     pop <- dementia_population
     data <- data.frame(
-      c("Population count", "Outcome count", "Median time-at-risk (interquartile range)", "Female", "Male"),
-      c(nrow(pop), sum(pop$outcomeCount), median(pop$timeAtRisk), sum(pop$gender == 8532), sum(pop$gender == 8507)),
-      c(100.0, round(sum(pop$outcomeCount)/nrow(pop)*100, 1), IQR(pop$timeAtRisk), round(sum(pop$gender == 8532)/nrow(pop)*100, 1), round(sum(pop$gender == 8507)/nrow(pop)*100, 1))
-    )
+      c("Population count",
+        "Outcome count",
+        "Median time-at-risk (interquartile range)",
+        "Female",
+        "Male"),
+      c(ifelse(nrow(pop) < minCellCount, paste0("<", minCellCount), nrow(pop)),
+        ifelse(sum(pop$outcomeCount) < minCellCount, paste0("<", minCellCount), sum(pop$outcomeCount)),
+        median(pop$timeAtRisk),
+        ifelse(sum(pop$gender == 8532) < minCellCount, paste0("<", minCellCount), sum(pop$gender == 8532)),
+        ifelse(sum(pop$gender == 8507) < minCellCount, paste0("<", minCellCount), sum(pop$gender == 8507))),
+      c(100.0,
+        ifelse(sum(pop$outcomeCount) < minCellCount, paste0("-"), round(sum(pop$outcomeCount)/nrow(pop)*100, 1)),
+        IQR(pop$timeAtRisk),
+        ifelse(sum(pop$gender == 8532) < minCellCount, paste0("-"), round(sum(pop$gender == 8532)/nrow(pop)*100, 1)),
+        ifelse(sum(pop$gender == 8507) < minCellCount, paste0("-"), round(sum(pop$gender == 8507)/nrow(pop)*100, 1))
+      ))
     names(data) <- names(tableOne)
     tableOne <- rbind(data, tableOne)
-    
+
     saveRDS(tableOne, file.path(outputDirectory, "dementia.rds"))
   }
 )
@@ -219,12 +240,30 @@ try(
       showPercent = TRUE
     )
     
+    # handle min cell count
+    mask <- as.numeric(gsub(",", "", tableOne$Count)) < minCellCount
+    mask[is.na(mask)] <- FALSE
+    tableOne[[2]] <- ifelse(mask, paste0("<", minCellCount), tableOne[[2]])
+    tableOne[[3]] <- ifelse(mask, "-", tableOne[[3]])
+    
     pop <- bipolar_population
     data <- data.frame(
-      c("Population count", "Outcome count", "Median time-at-risk (interquartile range)", "Female", "Male"),
-      c(nrow(pop), sum(pop$outcomeCount), median(pop$timeAtRisk), sum(pop$gender == 8532), sum(pop$gender == 8507)),
-      c(100.0, round(sum(pop$outcomeCount)/nrow(pop)*100, 1), IQR(pop$timeAtRisk), round(sum(pop$gender == 8532)/nrow(pop)*100, 1), round(sum(pop$gender == 8507)/nrow(pop)*100, 1))
-    )
+      c("Population count",
+        "Outcome count",
+        "Median time-at-risk (interquartile range)",
+        "Female",
+        "Male"),
+      c(ifelse(nrow(pop) < minCellCount, paste0("<", minCellCount), nrow(pop)),
+        ifelse(sum(pop$outcomeCount) < minCellCount, paste0("<", minCellCount), sum(pop$outcomeCount)),
+        median(pop$timeAtRisk),
+        ifelse(sum(pop$gender == 8532) < minCellCount, paste0("<", minCellCount), sum(pop$gender == 8532)),
+        ifelse(sum(pop$gender == 8507) < minCellCount, paste0("<", minCellCount), sum(pop$gender == 8507))),
+      c(100.0,
+        ifelse(sum(pop$outcomeCount) < minCellCount, paste0("-"), round(sum(pop$outcomeCount)/nrow(pop)*100, 1)),
+        IQR(pop$timeAtRisk),
+        ifelse(sum(pop$gender == 8532) < minCellCount, paste0("-"), round(sum(pop$gender == 8532)/nrow(pop)*100, 1)),
+        ifelse(sum(pop$gender == 8507) < minCellCount, paste0("-"), round(sum(pop$gender == 8507)/nrow(pop)*100, 1))
+      ))
     names(data) <- names(tableOne)
     tableOne <- rbind(data, tableOne)
     
@@ -288,12 +327,30 @@ try(
       showPercent = TRUE
     )
     
+    # handle min cell count
+    mask <- as.numeric(gsub(",", "", tableOne$Count)) < minCellCount
+    mask[is.na(mask)] <- FALSE
+    tableOne[[2]] <- ifelse(mask, paste0("<", minCellCount), tableOne[[2]])
+    tableOne[[3]] <- ifelse(mask, "-", tableOne[[3]])
+    
     pop <- lungcancer_population
     data <- data.frame(
-      c("Population count", "Outcome count", "Median time-at-risk (interquartile range)", "Female", "Male"),
-      c(nrow(pop), sum(pop$outcomeCount), median(pop$timeAtRisk), sum(pop$gender == 8532), sum(pop$gender == 8507)),
-      c(100.0, round(sum(pop$outcomeCount)/nrow(pop)*100, 1), IQR(pop$timeAtRisk), round(sum(pop$gender == 8532)/nrow(pop)*100, 1), round(sum(pop$gender == 8507)/nrow(pop)*100, 1))
-    )
+      c("Population count",
+        "Outcome count",
+        "Median time-at-risk (interquartile range)",
+        "Female",
+        "Male"),
+      c(ifelse(nrow(pop) < minCellCount, paste0("<", minCellCount), nrow(pop)),
+        ifelse(sum(pop$outcomeCount) < minCellCount, paste0("<", minCellCount), sum(pop$outcomeCount)),
+        median(pop$timeAtRisk),
+        ifelse(sum(pop$gender == 8532) < minCellCount, paste0("<", minCellCount), sum(pop$gender == 8532)),
+        ifelse(sum(pop$gender == 8507) < minCellCount, paste0("<", minCellCount), sum(pop$gender == 8507))),
+      c(100.0,
+        ifelse(sum(pop$outcomeCount) < minCellCount, paste0("-"), round(sum(pop$outcomeCount)/nrow(pop)*100, 1)),
+        IQR(pop$timeAtRisk),
+        ifelse(sum(pop$gender == 8532) < minCellCount, paste0("-"), round(sum(pop$gender == 8532)/nrow(pop)*100, 1)),
+        ifelse(sum(pop$gender == 8507) < minCellCount, paste0("-"), round(sum(pop$gender == 8507)/nrow(pop)*100, 1))
+      ))
     names(data) <- names(tableOne)
     tableOne <- rbind(data, tableOne)
     
