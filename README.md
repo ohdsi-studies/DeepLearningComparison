@@ -41,6 +41,7 @@ We recommend running the table1 script first to ensure that the target populatio
 remotes::install_github("OHDSI/DatabaseConnector@v6.2.3")
 remotes::install_github("OHDSI/PatientLevelPrediction@v6.3.5")
 remotes::install_github("OHDSI/CohortGenerator@v0.8.1")
+remotes::install_github("OHDSI/CirceR@v1.3.2")
 
 # Inputs to run (edit these for your CDM):
 # ========================================= #

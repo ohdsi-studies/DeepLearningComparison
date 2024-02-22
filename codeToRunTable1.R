@@ -3,6 +3,7 @@
 # remotes::install_github("OHDSI/DatabaseConnector@v6.2.3")
 # remotes::install_github("OHDSI/PatientLevelPrediction@v6.3.5")
 # remotes::install_github("OHDSI/CohortGenerator@v0.8.1")
+# remotes::install_github("OHDSI/CirceR@v1.3.2")
 # install.packages("stringr")
 
 
