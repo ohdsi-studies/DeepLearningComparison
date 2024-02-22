@@ -1,5 +1,4 @@
-Deep Learning Comparison
-========================
+# Deep Learning Comparison
 
 <img src="https://img.shields.io/badge/Study%20Status-Repo%20Created-lightgray.svg" alt="Study Status: Repo Created"/>
 
@@ -10,7 +9,7 @@ Deep Learning Comparison
 -   Study lead forums tag: **-**
 -   Study start date: **-**
 -   Study end date: **-**
--   Protocol: **[Protocol](StudyProtocol.pdf)**
+-   Protocol: [**Protocol**](StudyProtocol.pdf)
 -   Publications: **-**
 -   Results explorer: **-**
 
@@ -18,13 +17,46 @@ A comparison of different deep learning models for three prediction tasks previo
 
 This study will use Strategus (v0.1.0) and requires: - OMOP CDM database - Java for the JDBC connection - R (plus R studio is recommended) - The R package keyring to be set up
 
-Note that by default the study will run on cuda:0. If you need to run on a different gpu in your system you can specify the environment variable CUDA_VISIBLE_DEVICES to the required gpu before execution.
+Note that by default the study will run on ```cuda:0```. If you have more GPUs and want to use a specific one you can specify the environment variable CUDA_VISIBLE_DEVICES to the required gpu before execution. For example using R:
+
+```R
+Sys.setenv("CUDA_VISIBLE_DEVICES" = "1") # run on GPU number 2 (0-indexed)
+```
 
 We also provide a docker container, which is by far the easiest way to run the study if your environment supports it. For more information see readme in docker subfolder.
 
-# Code To Run
+# Recommended hardware requirements
+CPUs : 8
+CPU memory: 32GB
+GPU : Cuda capable GPU with at least 12-16 GB of GPU memory, can depend on size of data for Transformer model. 
+Diskspace: 50GB 
 
-To run the study execute the following code, make sure you adjust the inputs to your environment. This snippet is as well stored in codeToRun.R
+# Code To Run
+First you need to clone this git repo to the machine where you want to run the study which has access to both the database and GPUs.
+
+We recommend running the table1 script first to ensure that the target populations are present in your database. This script requires recent versions of PatientLevelPrediction (v6.3.5), CohortGenerator (v.0.8.1) and DatabaseConnector (v6.2.3). Make sure to edit the codeToRunTable1.R to match your environment. All variables needed are inside the input markers.
+
+```r
+# install these packages if needed
+remotes::install_github("OHDSI/DatabaseConnector@v6.2.3")
+remotes::install_github("OHDSI/PatientLevelPrediction@v6.3.5")
+remotes::install_github("OHDSI/CohortGenerator@v0.8.1")
+
+# Inputs to run (edit these for your CDM):
+# ========================================= #
+
+# code with variables to be edited for your environ
+
+# ========================================= #
+```
+
+Then to run the script execute:
+
+``` r
+source('codeToRunTable1.R')
+```
+
+To run the model development execute the following code, make sure you adjust the inputs to your environment. This snippet is as well stored in codeToRun.R
 
 ```{r}
 # Install Strategus if needed
@@ -68,7 +100,7 @@ minCellCount <- 5
 
 
 # Location to Strategus modules
-# If you've ran Strategus studies before this directory should already exist.
+# If you've ran Strategus studies before on the machine this directory should already exist.
 # Note: this environmental variable should be set once for each compute node
 Sys.setenv("INSTANTIATED_MODULES_FOLDER" = '/modules/')
 
@@ -100,3 +132,5 @@ Strategus::execute(
   restart = F
 )
 ```
+
+

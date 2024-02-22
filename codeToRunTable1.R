@@ -1,14 +1,22 @@
+# if you want to run this code, you need to have the following packages installed:
+# install.packages("remotes")
+# remotes::install_github("OHDSI/DatabaseConnector@v6.2.3")
+# remotes::install_github("OHDSI/PatientLevelPrediction@v6.3.5")
+# remotes::install_github("OHDSI/CohortGenerator@v0.8.1")
+# install.packages("stringr")
+
 
 library(remotes)
 library(stringr)
-library(DatabaseConnector)
-library(PatientLevelPrediction)
-library(CohortGenerator)
+library(DatabaseConnector) # remotes::install_github("OHDSI/DatabaseConnector@v6.2.3")
+library(PatientLevelPrediction) # remotes::install_github("OHDSI/PatientLevelPrediction@v6.3.5")
+library(CohortGenerator) # remotes::install_github("OHDSI/CohortGenerator@v0.8.1")
 library(CirceR)
 
-# ------------------------------------------------------------------------------
+# Inputs to run (edit these for your CDM):
+# ========================================= #
 
-## uncomment below option to set a custom temporary folder
+## uncomment below option to set a custom temporary folder for Andromeda
 # options(andromedaTempFolder = "")
 
 minCellCount <- as.numeric(Sys.getenv('MIN_CELL_COUNT'))
@@ -22,17 +30,18 @@ connectionDetails <- DatabaseConnector::createConnectionDetails(
   user = Sys.getenv("DATABASE_USER"),
   password = Sys.getenv("DATABASE_PASSWORD"),
   port = Sys.getenv("DATABASE_PORT"),
-  pathToDriver = "/database_drivers"
+  pathToDriver = Sys.getenv("DRIVER_PATH")
 )
 
 cdmDatabaseSchema <- Sys.getenv("CDM_SCHEMA")
 cohortDatabaseSchema <- Sys.getenv("WORK_SCHEMA")
 cohortTable <- Sys.getenv("TABLE1_COHORT_TABLE")
 
-# ensure this file path points to the cohorts folder in DeepLearningComparison
+# ensure this file path points to the cohorts folder in DeepLearningComparison folder
 cohortDirectory <- "/project/cohorts" # file.path(getwd(), "cohorts")
 
-# ------------------------------------------------------------------------------
+# =========== END OF INPUTS ========== #
+
 dir.create(file.path(outputDirectory, "dlc_table1_results"))
 outputDirectory <- file.path(outputDirectory, "dlc_table1_results")
 cohortIds <- list(dementia=list(target=11931, outcome=6243),
