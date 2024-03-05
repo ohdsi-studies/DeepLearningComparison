@@ -343,7 +343,7 @@ for (modelSetting in classicModelSettings) {
 
 
 # source the latest PatientLevelPredictionModule SettingsFunctions.R
-source("https://raw.githubusercontent.com/OHDSI/DeepPatientLevelPredictionModule/v0.2.1/SettingsFunctions.R")
+source("https://raw.githubusercontent.com/OHDSI/DeepPatientLevelPredictionModule/v0.2.2/SettingsFunctions.R")
 source("https://raw.githubusercontent.com/OHDSI/PatientLevelPredictionModule/v0.2.1/SettingsFunctions.R")
 
 # this will load a function called createPatientLevelPredictionModuleSpecifications
@@ -364,4 +364,4 @@ analysisSpecifications <- createEmptyAnalysisSpecificiations() |>
   addModuleSpecifications(deepPatientLevelPredictionModuleSpecifications)
 
 # SAVING TO SHARE
-ParallelLogger::saveSettingsToJson(analysisSpecifications, 'deep_comp_study.json')
+ParallelLogger::saveSettingsToJson(analysisSpecifications, './study_execution_jsons/deep_comp_study.json')
