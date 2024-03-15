@@ -15,12 +15,15 @@ DATABASE_SERVER=database/ehr-v1234
 DATABASE_USER=jdoe
 DATABASE_PASSWORD=secret_password
 DATABASE_PORT=5432
+DATABASE_CONNECTION_STRING=
 WORK_SCHEMA=jdoe_schema
 STRATEGUS_COHORT_TABLE=strategus_cohort_table
 TABLE1_COHORT_TABLE=table1_cohort_table
 MIN_CELL_COUNT=5
 CDM_SCHEMA=cdm_schema
 ```
+
+Leave those fields empty that you don't use when connecting to your database.
 
 ### Run Table 1 Analysis
 Download the latest version of the Table 1 Docker container.
@@ -30,7 +33,7 @@ docker pull ohdsi/deeplearningcomparison:table1_latest
 
 To run the Table 1 Docker container, replace `/host/output/folder` with your desired output directory path, and `/host/secret/folder/secrets.env` with the path to your `secrets.env` file.
 ```
-docker run -it --env-file /host/secret/folder/secrets.env -v /host/output/folder:/output deeplearningcomparison:table1_latest
+docker run -it --env-file /host/secret/folder/secrets.env -v /host/output/folder:/output ohdsi/deeplearningcomparison:table1_latest
 ```
 Running the Docker container will open an R session. Execute the Table 1 analysis as follows.
 ```
@@ -45,7 +48,7 @@ These files contain the Table 1 information for each of the three target populat
 ```
 dementia_table1 <- readRDS('/host/output/folder/dementia.rds')
 lungcancer_table1 <- readRDS('/host/output/folder/lungcancer.rds')
-dbipolar_table1 <- readRDS('/host/output/folder/bipolar.rds')
+bipolar_table1 <- readRDS('/host/output/folder/bipolar.rds')
 ```
 Inspect the three files in your R environment before sharing them with us.
 

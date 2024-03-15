@@ -31,7 +31,8 @@ connectionDetails <- DatabaseConnector::createConnectionDetails(
   user = Sys.getenv("DATABASE_USER"),
   password = Sys.getenv("DATABASE_PASSWORD"),
   port = Sys.getenv("DATABASE_PORT"),
-  pathToDriver = Sys.getenv("DRIVER_PATH")
+  connectionString = Sys.getenv("DATABASE_CONNECTION_STRING"),
+  pathToDriver = "/database_drivers"
 )
 
 cdmDatabaseSchema <- Sys.getenv("CDM_SCHEMA")
