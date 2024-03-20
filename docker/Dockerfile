@@ -32,7 +32,7 @@ COPY docker/initialiseModules.R initialiseModules.R
 RUN Rscript initialiseModules.R
 
 # set up python, without conda and pip caches
-WORKDIR /modules/DeepPatientLevelPredictionModule_0.2.1/
+WORKDIR /modules/DeepPatientLevelPredictionModule_0.2.2/
 ENV RETICULATE_MINICONDA_PATH=/opt/conda/
 RUN Rscript -e "renv::activate('.')" \
     -e "reticulate::install_miniconda()" \
