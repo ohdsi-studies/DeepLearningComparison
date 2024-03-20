@@ -113,6 +113,7 @@ databaseDetails_dementia <- PatientLevelPrediction::createDatabaseDetails(
   cdmDatabaseSchema = cdmDatabaseSchema,
   cdmDatabaseName = cdmDatabaseName,
   cohortDatabaseSchema = cohortDatabaseSchema,
+  tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
   cohortTable = cohortTable,
   outcomeDatabaseSchema = cohortDatabaseSchema,
   outcomeTable = cohortTable,
@@ -207,6 +208,7 @@ databaseDetails_bipolar <- PatientLevelPrediction::createDatabaseDetails(
   cohortTable = cohortTable,
   outcomeDatabaseSchema = cohortDatabaseSchema,
   outcomeTable = cohortTable,
+  tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
   targetId = cohortIds$bipolar$target,
   outcomeIds = cohortIds$bipolar$outcome
 )
@@ -292,6 +294,7 @@ databaseDetails_lungcancer <- PatientLevelPrediction::createDatabaseDetails(
   cdmDatabaseName = cdmDatabaseName,
   cohortDatabaseSchema = cohortDatabaseSchema,
   cohortTable = cohortTable,
+  tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
   outcomeDatabaseSchema = cohortDatabaseSchema,
   outcomeTable = cohortTable,
   targetId = cohortIds$lungcancer$target,
