@@ -1,11 +1,14 @@
 # Install Strategus
-# remotes::install_github("ohdsi/Strategus@v0.1.0")
+# remotes::install_github("mi-erasmusmc/Strategus@v0.1.2")
 
 # load Strategus
 library(Strategus)
 
 # Inputs to run (edit these for your CDM):
 # ========================================= #
+if (!Sys.getenv("DATABASE_TEMP_SCHEMA") == "") {
+  options(sqlRenderTempEmulationSchema = Sys.getenv("DATABASE_TEMP_SCHEMA"))
+}
 
 database <- Sys.getenv("DATABASE") # your database name 
 
@@ -24,7 +27,7 @@ connectionDetails <- DatabaseConnector::createConnectionDetails(
   port = Sys.getenv("DATABASE_PORT"),
   connectionString = Sys.getenv("DATABASE_CONNECTION_STRING"),
   pathToDriver = "/database_drivers"
-)
+) 
 
 # A schema with write access to store cohort tables
 workDatabaseSchema <- Sys.getenv("WORK_SCHEMA")

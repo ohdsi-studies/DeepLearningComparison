@@ -19,7 +19,9 @@ library(CirceR)
 
 ## uncomment below option to set a custom temporary folder for Andromeda
 # options(andromedaTempFolder = "")
-options(sqlRenderTempEmulationSchema = Sys.getenv("DATABASE_TEMP_SCHEMA"))
+if (!Sys.getenv("DATABASE_TEMP_SCHEMA") == "") {
+  options(sqlRenderTempEmulationSchema = Sys.getenv("DATABASE_TEMP_SCHEMA"))
+}
 
 minCellCount <- as.numeric(Sys.getenv('MIN_CELL_COUNT'))
 cdmDatabaseName = Sys.getenv("DATABASE")
