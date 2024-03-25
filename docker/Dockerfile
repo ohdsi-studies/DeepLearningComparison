@@ -27,7 +27,7 @@ RUN R cmd javareconf &&  \
 RUN Rscript -e "DatabaseConnector::downloadJdbcDrivers(dbms='all', pathToDriver='/database_drivers/')"
 
 # initialize modules
-COPY study_execution_jsons/deep_comp_study.json deep_comp_study.json
+COPY study_execution_jsons/deep_comp_study.json study_execution_jsons/deep_comp_study.json
 COPY docker/initialiseModules.R initialiseModules.R
 RUN Rscript initialiseModules.R
 

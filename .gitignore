@@ -4,4 +4,4 @@
 .Ruserdata
 renv/
 testStudy.R
-docker/secrets.env
+docker/my_secrets.env
