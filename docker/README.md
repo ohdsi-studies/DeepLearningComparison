@@ -5,6 +5,16 @@ The study consists of three separate analyses that can be executed using Docker 
 - **Model Development** - Trains conventional and deep learning models for the target populations.
 - **Model Validation** - Validates conventional and deep learning models that have been developed on other databases.
 
+## Content
+
+- [Deep Learning Comparison - Docker](#deep-learning-comparison---docker)
+  - [Execute study](#execute-study)
+    - [Preparation](#preparation)
+    - [Run Table 1 Analysis](#run-table-1-analysis)
+    - [Run Model Development](#run-model-development)
+    - [Run Model Validation](#run-model-validation)
+  - [Share results](#share-results)
+
 ## Execute study
 ### Preparation
 To run the analyses you must specify connection and execution parameters in a `secrets.env` file. This can be done by creating a text file named `secrets.env` or by downloading our template from [here](https://github.com/ohdsi-studies/DeepLearningComparison/blob/master/docker/secrets.env).  Below is the format for `secrets.env`, exemplified with a sample database configuration. 
@@ -50,7 +60,7 @@ dementia_table1 <- readRDS('/host/output/folder/dementia.rds')
 lungcancer_table1 <- readRDS('/host/output/folder/lungcancer.rds')
 bipolar_table1 <- readRDS('/host/output/folder/bipolar.rds')
 ```
-Inspect the three files in your R environment before sharing them with us.
+Inspect the three files in your R environment before sharing them with us as described [here](#share-results).
 
 ### Run Model Development
 
@@ -93,3 +103,29 @@ Then your command to run the container would be:
 If you want to run it using a different container runtime and need help please open an issue.
 
 ### Run Model Validation
+
+## Share Results
+
+The result files are generated using the OHDSI pipeline, which ensures that only non-identifying data is included in the output files. Nevertheless, before sharing any results with us, we kindly ask you to double-check that the files do not contain any data that you are not permitted to share. To securely share the results with the study coordinator, we use the OhdsiSharing R package. We suggest to compress multiple result files into a Zip archive.
+
+Install the OhdsiSharing package:
+```
+library(remotes)
+remotes::install_github("ohdsi/OhdsiSharing")
+library(OhdsiSharing)
+```
+
+Use the following code to upload the results to the OHDSI SFTP server. Please contact us to receive the data site public key.
+```
+dataSiteKey <- "/path/to/public-key/study-data-site-dlc" # path to the data site public key
+userName <- "study-data-site-dlc" # the user name to access the SFTP server
+fileName <- "/path/to/results.zip" # the path to the results to be shared
+remoteFolder <- "your-site-name" # a name to identify your site or database
+
+OhdsiSharing::sftpUploadFile(
+  privateKeyFileName = dataSiteKey,
+  userName = userName,
+  fileName = fileName,
+  remoteFolder = remoteFolder
+)
+```
