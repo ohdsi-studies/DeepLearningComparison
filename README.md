@@ -1,17 +1,18 @@
-# Deep Learning Comparison
+Deep Learning Comparison
+========================
 
 <img src="https://img.shields.io/badge/Study%20Status-Repo%20Created-lightgray.svg" alt="Study Status: Repo Created"/>
 
--   Analytics use case(s): **Patient-Level Prediction**
--   Study type: **Methods Research**
--   Tags: **Deep Learning**
--   Study lead: **Chungsoo Kim, Henrik John, Jenna Reps and Egill Fridgeirsson**
--   Study lead forums tag: **-**
--   Study start date: **-**
--   Study end date: **-**
--   Protocol: [**Protocol**](StudyProtocol.pdf)
--   Publications: **-**
--   Results explorer: **-**
+- Analytics use case(s): **Patient-Level Prediction**
+- Study type: **Methods Research**
+- Tags: **Deep Learning**
+- Study lead: **Chungsoo Kim, Henrik John, Jenna Reps and Egill Fridgeirsson**
+- Study lead forums tag: **-**
+- Study start date: **-**
+- Study end date: **-**
+- Protocol: [**Protocol**](StudyProtocol.pdf)
+- Publications: **-**
+- Results explorer: **-**
 
 A comparison of different deep learning models for three prediction tasks previously studied: predicting 3-year risk of lung cancer in low risk population, predicting 10-year risk of dementia and predicting 1-year risk bipolar in MDD.
 
