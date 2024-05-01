@@ -1,7 +1,7 @@
 
 if (!require("remotes")) install.packages("remotes"); library(remotes)
 if (!require("dplyr")) install.packages("dplyr"); library(dplyr)
-if (!require("Strategus")) remotes::install_github('ohdsi/Strategus@v0.1.0', upgrade = "never"); library(Strategus)
+if (!require("Strategus")) remotes::install_github('mi-erasmusmc/Strategus@v0.1.2', upgrade = "never"); library(Strategus)
 if (!require("PatientLevelPrediction")) remotes::install_github('ohdsi/PatientLevelPrediction@v6.3.8', upgrade = "never"); library(PatientLevelPrediction)
 if (!require("DeepPatientLevelPrediction")) remotes::install_github('ohdsi/DeepPatientLevelPrediction@develop', upgrade = "never"); library(DeepPatientLevelPrediction)
 
