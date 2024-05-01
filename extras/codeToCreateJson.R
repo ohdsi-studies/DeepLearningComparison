@@ -2,8 +2,8 @@
 if (!require("remotes")) install.packages("remotes"); library(remotes)
 if (!require("dplyr")) install.packages("dplyr"); library(dplyr)
 if (!require("Strategus")) remotes::install_github('ohdsi/Strategus@v0.1.0', upgrade = "never"); library(Strategus)
-if (!require("PatientLevelPrediction")) remotes::install_github('ohdsi/PatientLevelPrediction@v6.3.5', upgrade = "never"); library(PatientLevelPrediction)
-if (!require("DeepPatientLevelPrediction")) remotes::install_github('ohdsi/DeepPatientLevelPrediction@v2.0.2', upgrade = "never"); library(DeepPatientLevelPrediction)
+if (!require("PatientLevelPrediction")) remotes::install_github('ohdsi/PatientLevelPrediction@v6.3.8', upgrade = "never"); library(PatientLevelPrediction)
+if (!require("DeepPatientLevelPrediction")) remotes::install_github('ohdsi/DeepPatientLevelPrediction@develop', upgrade = "never"); library(DeepPatientLevelPrediction)
 
 ################################################################################
 # COHORTS ######################################################################
@@ -44,7 +44,7 @@ createCohortSharedResource <- function(cohortDefinitionSet) {
 # COHORT GENERATION SETTINGS
 
 # source the cohort generator settings function
-source("https://raw.githubusercontent.com/OHDSI/CohortGeneratorModule/v0.2.1/SettingsFunctions.R")
+source("https://raw.githubusercontent.com/mi-erasmusmc/CohortGeneratorModule/v0.2.2/SettingsFunctions.R")
 # this loads a function called createCohortGeneratorModuleSpecifications that takes as
 # input incremental (boolean) and generateStats (boolean)
 
@@ -149,11 +149,17 @@ gradientBoostingModelSettings <- setGradientBoostingMachine(
 )
 
 getDevice <- function() {
-  dev <- Sys.getenv("deepPLPDevice")
+  dev <- Sys.getenv("DPLP_DEVICE")
   if(dev == "") {
     if (torch$cuda$is_available()) dev<-"cuda:0" else dev<-"cpu"
   }
   dev
+}
+
+getSteps <- function() {
+  steps <- Sys.getenv("DPLP_STEPS")
+  if (steps == "") steps <- 1
+  as.integer(steps)
 }
 
 resNetModelSettings <- setResNet(
@@ -164,17 +170,18 @@ resNetModelSettings <- setResNet(
   hiddenDropout = seq(0, 3e-1, 5e-2),
   residualDropout = seq(0, 3e-1, 5e-2),
   hyperParamSearch = 'random',
-  randomSample = 1e2,
+  randomSample = 100,
   randomSampleSeed = 123,
   estimatorSettings = setEstimator(
     weightDecay = c(1e-6, 1e-3),
-    batchSize=5*2^10,
+    batchSize = 5*2^10,
     learningRate = "auto",
     device = getDevice,
-    epochs=5e1,
-    seed=1e3,
-    earlyStopping = list(useEarlyStopping=TRUE,
-                         params = list(patience=4)))
+    epochs = 50,
+    seed = 1e3,
+    accumulationSteps = getSteps,
+    earlyStopping = list(useEarlyStopping = TRUE,
+                         params = list(patience = 4)))
 )
 
 transformerModelSettings <- setTransformer(
@@ -195,8 +202,9 @@ transformerModelSettings <- setTransformer(
     batchSize=2^9,
     learningRate = "auto",
     device = getDevice,
-    epochs=5e1,
-    seed=1e3,
+    epochs = 50,
+    seed = 1e3,
+    accumulationSteps = getSteps,
     earlyStopping = list(useEarlyStopping=TRUE,
                          params = list(patience=4)))
 )
@@ -343,8 +351,8 @@ for (modelSetting in classicModelSettings) {
 
 
 # source the latest PatientLevelPredictionModule SettingsFunctions.R
-source("https://raw.githubusercontent.com/OHDSI/DeepPatientLevelPredictionModule/v0.2.2/SettingsFunctions.R")
-source("https://raw.githubusercontent.com/OHDSI/PatientLevelPredictionModule/v0.2.1/SettingsFunctions.R")
+source("https://raw.githubusercontent.com/OHDSI/DeepPatientLevelPredictionModule/v0.2.3/SettingsFunctions.R")
+source("https://raw.githubusercontent.com/mi-erasmusmc/PatientLevelPredictionModule/v0.2.2/SettingsFunctions.R")
 
 # this will load a function called createPatientLevelPredictionModuleSpecifications
 # that takes as input a modelDesignList
