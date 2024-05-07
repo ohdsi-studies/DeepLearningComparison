@@ -1,46 +1,51 @@
-# Install latest Strategus
-# remotes::install_github("ohdsi/Strategus")
+# Install Strategus
+# remotes::install_github("mi-erasmusmc/Strategus@v0.1.2")
 
 # load Strategus
 library(Strategus)
 
 # Inputs to run (edit these for your CDM):
 # ========================================= #
+if (!Sys.getenv("DATABASE_TEMP_SCHEMA") == "") {
+  options(sqlRenderTempEmulationSchema = Sys.getenv("DATABASE_TEMP_SCHEMA"))
+}
 
-database <- 'databaseName' # your database name
+database <- Sys.getenv("DATABASE") # your database name 
 
 # reference for the connection used by Strategus
 connectionDetailsReference <- paste0("DeepLearningComparison_", database)
 
-# where to save the output
-outputFolder <- 'outputLocation'
+# where to save the output - a directory in your environment
+outputFolder <- "/output/"
 
-
+# fill in your connection details and path to driver
 connectionDetails <- DatabaseConnector::createConnectionDetails(
-  dbms = keyring::key_get('dbms', 'all'), 
-  server = keyring::key_get('server', database), 
-  user = keyring::key_get('user', 'all'),
-  password = keyring::key_get('pw', 'all'),
-  port = keyring::key_get('port', 'all'),
-  pathToDriver = Sys.getenv("REDSHIFT_DRIVER")
+  dbms = Sys.getenv('DBMS'), 
+  server = Sys.getenv("DATABASE_SERVER"), 
+  user = Sys.getenv("DATABASE_USER"),
+  password = Sys.getenv("DATABASE_PASSWORD"),
+  port = Sys.getenv("DATABASE_PORT"),
+  connectionString = Sys.getenv("DATABASE_CONNECTION_STRING"),
+  pathToDriver = "/database_drivers"
 )
 
 # A schema with write access to store cohort tables
-workDatabaseSchema <- keyring::key_get('workDatabaseSchema', 'all')
+workDatabaseSchema <- Sys.getenv("WORK_SCHEMA")
 
-# name of cohort table for study
-cohortTable <- "strategus_cohort_table"
+# name of cohort table that will be created for study
+cohortTable <- Sys.getenv("STRATEGUS_COHORT_TABLE")
 
 # schema where the cdm data is
-cdmDatabaseSchema <- keyring::key_get('cdmDatabaseSchema', database)
+cdmDatabaseSchema <- Sys.getenv("CDM_SCHEMA")
 
 # Aggregated statistics with cell count less than this are removed before sharing results.
 minCellCount <- 5
 
 
 # Location to Strategus modules
+# If you've ran Strategus studies before this directory should already exist.
 # Note: this environmental variable should be set once for each compute node
-Sys.setenv("INSTANTIATED_MODULES_FOLDER" = 'moduleLocation')
+Sys.setenv("INSTANTIATED_MODULES_FOLDER" = '/modules/')
 
 
 # =========== END OF INPUTS ========== #
@@ -60,7 +65,7 @@ executionSettings <- Strategus::createCdmExecutionSettings(
   minCellCount = minCellCount
 )
 
-json <- paste(readLines('deep_comp_dementia_val_study.json'), collapse = '\n')
+json <- paste(readLines('./study_execution_jsons/dlc_validation_study.json'), collapse = '\n')
 analysisSpecifications <- ParallelLogger::convertJsonToSettings(json)
 
 Strategus::execute(
