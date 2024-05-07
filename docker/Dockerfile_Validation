@@ -28,10 +28,6 @@ ENV RENV_PATHS_CACHE /project/renv/.cache
 # optimize compilation
 ENV MAKEFLAGS="-j$(nproc)"
 
-# GitHub variables
-ARG GITHUB_PAT
-ENV GITHUB_PAT=${GITHUB_PAT}
-
 RUN echo "options(repos=list(CRAN='https://packagemanager.posit.co/cran/__linux__/jammy/latest'))" >> /root/.Rprofile
 COPY docker/setupProjectEnv.R setupProjectEnv.R
 RUN R cmd javareconf &&  \
