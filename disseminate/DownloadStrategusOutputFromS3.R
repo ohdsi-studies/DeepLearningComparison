@@ -30,17 +30,17 @@ getModelsFromS3 <- function(
       bucket <- s3Settings$bucket[i]
       region <- s3Settings$region[i]
       
-      result <- aws.s3::get_bucket_df(bucket = bucket, region = region)
+      result <- aws.s3::get_bucket_df(bucket = bucket, region = region, max = Inf)
       paths <- fs::path(result$Key)
       
       workDir <- findWorkDir(bucket, subfolder, region)
       analyses <- findAnalysesNames(bucket, workDir, region)
       
       if(length(analyses) > 0) {
-        if(!dir.exists(file.path(saveFolder, "models"))){
-          dir.create(file.path(saveFolder, "models"), recursive = T)
+        if(!fs::dir_exists(fs::path(saveFolder, "models"))){
+          dir.create(fs::path(saveFolder, "models"), recursive = T)
         }
-        saveToLoc <- file.path(saveFolder, "models")
+        saveToLoc <- fs::path(saveFolder, "models")
         
         for (analysis in analyses) {
           analysis_paths <- paths[fs::path_has_parent(paths, fs::path(workDir, analysis))]
@@ -82,7 +82,7 @@ getModelsFromS3 <- function(
 
 findWorkDir <- function(bucket, subfolder, region) {
   # list all content in the bucket
-  result <- aws.s3::get_bucket_df(bucket = bucket, region = region)
+  result <- aws.s3::get_bucket_df(bucket = bucket, region = region, max = Inf)
   # extract paths of all content
   paths <- fs::path(result$Key)
   # split paths up for easier processing
@@ -99,7 +99,7 @@ findWorkDir <- function(bucket, subfolder, region) {
 
 findAnalysesNames <- function(bucket, workDir, region) {
   # list all content in the bucket
-  result <- aws.s3::get_bucket_df(bucket = bucket, region = region)
+  result <- aws.s3::get_bucket_df(bucket = bucket, region = region, max = Inf)
   # extract paths of all content
   paths <- fs::path(result$Key)
   # filter for paths in work directory

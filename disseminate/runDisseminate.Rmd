@@ -22,6 +22,7 @@ library(ggplot2)
 library(tidyr)
 library(dplyr)
 library(viridis)
+library(tibble)
 ```
 
 Define environment variables for AWS credentials and region, if not yet defined.
@@ -97,6 +98,7 @@ df <- df %>%
   mutate(database_meta_data_id = case_when(
     database_meta_data_id %in% c(-1410378758) ~ "OPEHR",
     database_meta_data_id %in% c(1463865175) ~ "OPSES",
+    database_meta_data_id %in% c(1325395096) ~ "OPSES",
     database_meta_data_id %in% c(-795494529) ~ "AUSOM",
     database_meta_data_id %in% c(2139891622) ~ "IPCI",
     database_meta_data_id %in% c(1484143096) ~ "Stanford",
@@ -106,6 +108,7 @@ df <- df %>%
   mutate(validation_database_meta_data_id = case_when(
     validation_database_meta_data_id %in% c(-1410378758) ~ "OPEHR",
     validation_database_meta_data_id %in% c(1463865175) ~ "OPSES",
+    validation_database_meta_data_id %in% c(1325395096) ~ "OPSES",
     validation_database_meta_data_id %in% c(-795494529) ~ "AUSOM",
     validation_database_meta_data_id %in% c(2139891622) ~ "IPCI",
     validation_database_meta_data_id %in% c(1484143096) ~ "Stanford",
@@ -145,12 +148,13 @@ p <- ggplot(complete_data, aes(x = validation_database_meta_data_id, y = databas
         legend.text = element_text(hjust = 0.5),  # Centering text within the legend keys
         legend.title = element_text(hjust = 0.5),  # Horizontal justification (centered)
         legend.key.width = grid::unit(2, "cm"),  # Adjust key width
-        legend.key.height = grid::unit(0.3, "cm"),  # Adjust key width
+        legend.key.height = grid::unit(0.3, "cm"),  # Adjust key height
         legend.spacing.x = grid::unit(1, "cm"),  # Adjust spacing between keys
         legend.box.margin = margin(6, 6, 6, 6)) +
   guides(fill = guide_colorbar(nrow = 1, byrow = TRUE, title.position = "top", label.position = "bottom")) +
   facet_grid(cohort_definition_id ~ model_type)
 
-ggsave("plot.png", plot = p, width = 8, height = 7, dpi = 300)
+print(p)
+ggsave("heatmap.png", plot = p, width = 8, height = 7, dpi = 300)
 
 ```
