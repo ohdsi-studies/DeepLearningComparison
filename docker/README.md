@@ -126,35 +126,35 @@ Download the latest version of the Validation Docker container.
 docker pull docker.io/ohdsi/deeplearningcomparison_validation:latest
 ```
 
-To run the Validation Docker container, replace `/host/output/folder` with your desired output directory path, and `/host/secret/folder/secrets.env` with the path to your `secrets.env` file.
+To run the Validation Docker container, replace `/host/validation/output/folder` with your desired validation output directory path, and `/host/secret/folder/secrets.env` with the path to your `secrets.env` file. Ensure that this validation output directory is different from the output directory used for the model development analysis.
 
 There are various run configurations possible:
 
 1.  Run on the default GPU with the NVIDIA runtime. Refer back to the hardware acceleration section for more information on how to set up GPU support [here](#hardware-acceleration).
 
 ```         
-docker run -it --env-file /host/secret/folder/secrets.env --runtime=nvidia --gpus all -v /host/output/folder:/output ohdsi/deeplearningcomparison_validation:latest
+docker run -it --env-file /host/secret/folder/secrets.env --runtime=nvidia --gpus all -v /host/validation/output/folder:/output ohdsi/deeplearningcomparison_validation:latest
 ```
 
 2.  Explicitly specify the GPU to run on.
 
 ```         
 docker run -it --env-file /host/secret/folder/secrets.env
---runtime=nvidia -e NVIDIA_VISIBLE_DEVICES=1 -v /host/output/folder:/output
+--runtime=nvidia -e NVIDIA_VISIBLE_DEVICES=1 -v /host/validation/output/folder:/output
 ohdsi/deeplearningcomparison_validation:latest
 ```
 
 3.  Run on CPU by not providing the NVIDIA runtime.
 
 ```         
-docker run -it --env-file /host/secret/folder/secrets.env -v /host/output/folder:/output
+docker run -it --env-file /host/secret/folder/secrets.env -v /host/validation/output/folder:/output
 ohdsi/deeplearningcomparison_validation:latest
 ```
 
 The container can also be executed on different container runtimes such as Podman.
 
 ```         
-podman run -it --device nvidia.com/gpu=all --security-opt=label=disable --env-file=/host/secret/folder/secrets.env -v /host/output/folder:/output ohdsi/deeplearningcomparison_validation:latest
+podman run -it --device nvidia.com/gpu=all --security-opt=label=disable --env-file=/host/secret/folder/secrets.env -v /host/validation/output/folder:/output ohdsi/deeplearningcomparison_validation:latest
 ```
 
 Running the Docker container will open an R session. Execute the Validation analysis as follows.
@@ -163,7 +163,7 @@ Running the Docker container will open an R session. Execute the Validation anal
 source('codeToRunValidation.R')
 ```
 
-In the output directory, the analysis generates three folders. Compress and share the `strategusOutput` folder as described [here](#share-results).
+In the validation output directory, the analysis generates three folders. Compress and share the `strategusOutput` folder as described [here](#share-results).
 
 ## Share Results
 
