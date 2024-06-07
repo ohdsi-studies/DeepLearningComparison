@@ -85,7 +85,7 @@ df <- df %>%
     cohort_definition_id %in% c(298) ~ "Lung cancer",
     cohort_definition_id %in% c(10461) ~ "Bipolar",
     cohort_definition_id %in% c(6243) ~ "Dementia",
-    TRUE ~ "Other"
+    TRUE ~ "Data Error"
   )) %>%
   mutate(model_type = case_when(
     model_type %in% c("fitXgboost") ~ "Gradient boosting",
@@ -93,27 +93,33 @@ df <- df %>%
     model_type %in% c("logistic") ~ "Logistic regression",
     model_type %in% c("ResNet") ~ "ResNet",
     model_type %in% c("Transformer") ~ "Transformer",
-    TRUE ~ "Other"
+    TRUE ~ "Data Error"
   )) %>%
   mutate(database_meta_data_id = case_when(
     database_meta_data_id %in% c(-1410378758) ~ "OPEHR",
     database_meta_data_id %in% c(1463865175) ~ "OPSES",
-    database_meta_data_id %in% c(1325395096) ~ "OPSES",
     database_meta_data_id %in% c(-795494529) ~ "AUSOM",
     database_meta_data_id %in% c(2139891622) ~ "IPCI",
     database_meta_data_id %in% c(1484143096) ~ "Stanford",
     database_meta_data_id %in% c(528172452) ~ "Columbia",
-    TRUE ~ "Other"
+    database_meta_data_id %in% c(-1709821257) ~ "GERDA",
+    database_meta_data_id %in% c(67505556) ~ "JMDC",
+    database_meta_data_id %in% c(970917581) ~ "MDCD",
+    database_meta_data_id %in% c(78786751) ~ "MDCR",
+    TRUE ~ "Data Error"
   )) %>%
   mutate(validation_database_meta_data_id = case_when(
     validation_database_meta_data_id %in% c(-1410378758) ~ "OPEHR",
     validation_database_meta_data_id %in% c(1463865175) ~ "OPSES",
-    validation_database_meta_data_id %in% c(1325395096) ~ "OPSES",
     validation_database_meta_data_id %in% c(-795494529) ~ "AUSOM",
     validation_database_meta_data_id %in% c(2139891622) ~ "IPCI",
     validation_database_meta_data_id %in% c(1484143096) ~ "Stanford",
     validation_database_meta_data_id %in% c(528172452) ~ "Columbia",
-    TRUE ~ "Other"
+    validation_database_meta_data_id %in% c(-1709821257) ~ "GERDA",
+    validation_database_meta_data_id %in% c(67505556) ~ "JMDC",
+    validation_database_meta_data_id %in% c(970917581) ~ "MDCD",
+    validation_database_meta_data_id %in% c(78786751) ~ "MDCR",
+    TRUE ~ "Data Error"
   ))
 
 all_combinations <- expand.grid(
@@ -155,6 +161,6 @@ p <- ggplot(complete_data, aes(x = validation_database_meta_data_id, y = databas
   facet_grid(cohort_definition_id ~ model_type)
 
 print(p)
-ggsave("heatmap.png", plot = p, width = 8, height = 7, dpi = 300)
+ggsave("heatmap.png", plot = p, width = 14, height = 10, dpi = 300)
 
 ```
