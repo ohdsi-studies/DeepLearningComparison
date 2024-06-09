@@ -94,7 +94,7 @@ Download the latest version of the Development Docker container.
 docker pull docker.io/ohdsi/deeplearningcomparison:latest
 ```
 
-To run the Validation Docker container, replace `/host/output/folder` with your desired output directory path, and `/host/secret/folder/secrets.env` with the path to your `secrets.env` file.
+To run the Docker container, replace `/host/output/folder` with your desired output directory path, and `/host/secret/folder/secrets.env` with the path to your `secrets.env` file.
 
 ```         
 docker run -it --env-file secrets.env --runtime=nvidia --gpus all -v /host/output/folder:/output ohdsi/deeplearningcomparison:latest
