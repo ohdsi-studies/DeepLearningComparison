@@ -83,13 +83,13 @@ df <- dplyr::bind_rows(strategusDevOutput, strategusValOutput)
 df <- df %>%
   mutate(cohort_definition_id = case_when(
     cohort_definition_id %in% c(298) ~ "Lung cancer",
-    cohort_definition_id %in% c(10461) ~ "Bipolar",
+    cohort_definition_id %in% c(10461) ~ "Bipolar disorder",
     cohort_definition_id %in% c(6243) ~ "Dementia",
     TRUE ~ "Data Error"
   )) %>%
   mutate(model_type = case_when(
-    model_type %in% c("fitXgboost") ~ "Gradient boosting",
-    model_type %in% c("Xgboost") ~ "Gradient boosting",
+    model_type %in% c("fitXgboost") ~ "Xgboost",
+    model_type %in% c("Xgboost") ~ "Xgboost",
     model_type %in% c("logistic") ~ "Logistic regression",
     model_type %in% c("ResNet") ~ "ResNet",
     model_type %in% c("Transformer") ~ "Transformer",
@@ -100,12 +100,13 @@ df <- df %>%
     database_meta_data_id %in% c(1463865175) ~ "OPSES",
     database_meta_data_id %in% c(-795494529) ~ "AUSOM",
     database_meta_data_id %in% c(2139891622) ~ "IPCI",
-    database_meta_data_id %in% c(1484143096) ~ "Stanford",
-    database_meta_data_id %in% c(528172452) ~ "Columbia",
+    database_meta_data_id %in% c(1484143096) ~ "STARR-OMOP",
+    database_meta_data_id %in% c(528172452) ~ "CUIMC",
     database_meta_data_id %in% c(-1709821257) ~ "GERDA",
     database_meta_data_id %in% c(67505556) ~ "JMDC",
     database_meta_data_id %in% c(970917581) ~ "MDCD",
     database_meta_data_id %in% c(78786751) ~ "MDCR",
+    database_meta_data_id %in% c(-247464127) ~ "CCAE",
     TRUE ~ "Data Error"
   )) %>%
   mutate(validation_database_meta_data_id = case_when(
@@ -113,12 +114,13 @@ df <- df %>%
     validation_database_meta_data_id %in% c(1463865175) ~ "OPSES",
     validation_database_meta_data_id %in% c(-795494529) ~ "AUSOM",
     validation_database_meta_data_id %in% c(2139891622) ~ "IPCI",
-    validation_database_meta_data_id %in% c(1484143096) ~ "Stanford",
-    validation_database_meta_data_id %in% c(528172452) ~ "Columbia",
+    validation_database_meta_data_id %in% c(1484143096) ~ "STARR-OMOP",
+    validation_database_meta_data_id %in% c(528172452) ~ "CUIMC",
     validation_database_meta_data_id %in% c(-1709821257) ~ "GERDA",
     validation_database_meta_data_id %in% c(67505556) ~ "JMDC",
     validation_database_meta_data_id %in% c(970917581) ~ "MDCD",
     validation_database_meta_data_id %in% c(78786751) ~ "MDCR",
+    validation_database_meta_data_id %in% c(-247464127) ~ "CCAE",
     TRUE ~ "Data Error"
   ))
 
@@ -131,8 +133,10 @@ all_combinations <- expand.grid(
 
 complete_data <- merge(all_combinations, df, by = c("database_meta_data_id", "validation_database_meta_data_id","cohort_definition_id", "model_type"), all.x = TRUE)
 
-# Cleanup any potential NA columns if they were originally in 'df' and aren't needed:
-complete_data$value <- ifelse(is.na(complete_data$value), NA, complete_data$value)
+complete_data$value <- complete_data$AUROC
+
+# # Cleanup any potential NA columns if they were originally in 'df' and aren't needed:
+# complete_data$value <- ifelse(is.na(complete_data$value), NA, complete_data$value)
 
 color_data <- complete_data %>%
   mutate(text_color = ifelse(value > 0.75 | value < 0.5, "black", "white"))
@@ -161,6 +165,79 @@ p <- ggplot(complete_data, aes(x = validation_database_meta_data_id, y = databas
   facet_grid(cohort_definition_id ~ model_type)
 
 print(p)
-ggsave("heatmap.png", plot = p, width = 14, height = 10, dpi = 300)
+ggsave("heatmap.png", plot = p, width = 14, height = 8, dpi = 300)
 
+```
+
+Calibration Eavg
+
+```{r}
+
+complete_data$value <- complete_data$Eavg
+
+
+color_data <- complete_data %>%
+  mutate(text_color = ifelse(value < 0.1, "white", "black"))
+
+p <- ggplot(complete_data, aes(x = validation_database_meta_data_id, y = database_meta_data_id, fill = value)) +
+  geom_tile(na.rm = FALSE) +
+  geom_text(aes(label = ifelse(is.na(value), NA, sprintf("%.2f", value))), color = color_data$text_color,
+            vjust = 0.5, hjust = 0.5, size = 3, na.rm = TRUE) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  # scale_fill_gradient(low = "white", high = "blue") +
+  scale_y_discrete(expand = c(0, 0)) +
+  scale_x_discrete(expand = c(0, 0)) +
+  scale_fill_viridis(name="Eavg", limits = c(0.0, 0.08), option = "D", na.value = "#F0F0F0") +
+  labs(title = NULL,
+       x = "Validation database", y = "Development database", fill = expression(E[avg])) +
+  coord_fixed(ratio = 1) +
+  theme(legend.position = "bottom", legend.direction = "horizontal",
+        legend.text = element_text(hjust = 0.5),  # Centering text within the legend keys
+        legend.title = element_text(hjust = 0.5),  # Horizontal justification (centered)
+        legend.key.width = grid::unit(2, "cm"),  # Adjust key width
+        legend.key.height = grid::unit(0.3, "cm"),  # Adjust key height
+        legend.spacing.x = grid::unit(1, "cm"),  # Adjust spacing between keys
+        legend.box.margin = margin(6, 6, 6, 6)) +
+  guides(fill = guide_colorbar(nrow = 1, byrow = TRUE, title.position = "top", label.position = "bottom")) +
+  facet_grid(cohort_definition_id ~ model_type)
+
+print(p)
+ggsave("heatmap-eavg.png", plot = p, width = 14, height = 8, dpi = 300)
+```
+
+Calibration AUPRC
+
+```{r}
+complete_data$value <- complete_data$AUPRC
+
+
+color_data <- complete_data %>%
+  mutate(text_color = ifelse(value < 0.1, "white", "black"))
+
+p <- ggplot(complete_data, aes(x = validation_database_meta_data_id, y = database_meta_data_id, fill = value)) +
+  geom_tile(na.rm = FALSE) +
+  geom_text(aes(label = ifelse(is.na(value), NA, sprintf("%.2f", value))), color = color_data$text_color,
+            vjust = 0.5, hjust = 0.5, size = 3, na.rm = TRUE) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  # scale_fill_gradient(low = "white", high = "blue") +
+  scale_y_discrete(expand = c(0, 0)) +
+  scale_x_discrete(expand = c(0, 0)) +
+  scale_fill_viridis(name="AUPRC", limits = c(0.0, 0.5), option = "D", na.value = "#F0F0F0") +
+  labs(title = NULL,
+       x = "Validation database", y = "Development database", fill = "AUPRC") +
+  coord_fixed(ratio = 1) +
+  theme(legend.position = "bottom", legend.direction = "horizontal",
+        legend.text = element_text(hjust = 0.5),  # Centering text within the legend keys
+        legend.title = element_text(hjust = 0.5),  # Horizontal justification (centered)
+        legend.key.width = grid::unit(2, "cm"),  # Adjust key width
+        legend.key.height = grid::unit(0.3, "cm"),  # Adjust key height
+        legend.spacing.x = grid::unit(1, "cm"),  # Adjust spacing between keys
+        legend.box.margin = margin(6, 6, 6, 6)) +
+  guides(fill = guide_colorbar(nrow = 1, byrow = TRUE, title.position = "top", label.position = "bottom")) +
+  facet_grid(cohort_definition_id ~ model_type)
+
+print(p)
+ggsave("heatmap-auprc.png", plot = p, width = 14, height = 10, dpi = 300)
 ```

@@ -31,7 +31,8 @@ getAllAucValidation <- function(strategusOutputPath) {
       # Read models.csv
       performancesData <- read.csv(performancesFilePath)
       evaluationStatisticData <- read.csv(evaluationStatisticPath)
-      evaluationStatisticData <- evaluationStatisticData[evaluationStatisticData$metric == "AUROC", ]
+      evaluationStatisticData <- evaluationStatisticData[evaluationStatisticData$metric == "AUROC" | evaluationStatisticData$metric == "AUPRC" | evaluationStatisticData$metric == "Eavg", ] %>%
+        tidyr::pivot_wider(names_from = metric, values_from = value)
       
       databaseDetails <- read.csv(databaseDetailsPath)
       cohorts <- read.csv(cohorts)
@@ -65,6 +66,6 @@ getAllAucValidation <- function(strategusOutputPath) {
   }
   
   finalSelectedData <- combinedData %>%
-    select(database_meta_data_id, validation_database_meta_data_id, model_design_id, model_type, metric, value, cohort_definition_id, cohort_name) %>%
+    select(database_meta_data_id, validation_database_meta_data_id, model_design_id, model_type, AUROC, AUPRC, Eavg, cohort_definition_id, cohort_name) %>%
     filter(database_meta_data_id != validation_database_meta_data_id)
 }
