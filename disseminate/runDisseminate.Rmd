@@ -13,9 +13,9 @@ editor_options:
 
 # Disseminate Deep Learning Comparison Results
 
-Execute this script to create the figures for publication.
+Execute this script to create the figures and table data for publication.
 
-## Plot heat map
+## Setup
 
 ```{r}
 library(ggplot2)
@@ -33,7 +33,7 @@ Define environment variables for AWS credentials and region, if not yet defined.
 # Sys.setenv(AWS_DEFAULT_REGION = "eu-west-1")
 ```
 
-### Download results
+## Download and format study results
 
 Define the AWS S3 connection details and the folder to download the Strategus outputs to.
 
@@ -41,10 +41,12 @@ Define the AWS S3 connection details and the folder to download the Strategus ou
 bucket <- "s3://ohdsi-dlc/"
 region <- "eu-west-1"
 s3Folder <- "dlc-output"
-s3FoldeValidation <- "dlc-output-validation"
+s3FolderValidation <- "dlc-output-validation"
+s3FolderTable1 <- "dlc-output-table1"
 
 saveFolder <- "~/Desktop/ohdsi-dlc-download"
 saveFolderValidation <- "~/Desktop/ohdsi-dlc-download-validation"
+saveFolderTable1 <- "~/Desktop/ohdsi-dlc-download-table1"
 ```
 
 Download Strategus outputs from the development and validation steps.
@@ -56,8 +58,12 @@ s3Settings <- tibble(modelZipLocation = character(), bucket = character(), regio
 getModelsFromS3(s3Settings, saveFolder)
 
 s3SettingsValidation <- tibble(modelZipLocation = character(), bucket = character(), region = character()) |>
-  add_row(modelZipLocation=s3FoldeValidation, bucket=bucket, region=region)
+  add_row(modelZipLocation=s3FolderValidation, bucket=bucket, region=region)
 getModelsFromS3(s3SettingsValidation, saveFolderValidation)
+
+s3SettingsTable1 <- tibble(modelZipLocation = character(), bucket = character(), region = character()) |>
+  add_row(modelZipLocation=s3FolderTable1, bucket=bucket, region=region)
+getModelsFromS3(s3SettingsTable1, saveFolderTable1)
 
 ```
 
@@ -75,7 +81,7 @@ source("FormatValidationStrategusOutput.R")
 strategusValOutput <- getAllAucValidation(saveFolderValidation)
 ```
 
-Plot heat map.
+Prepare heat map data.
 
 ```{r}
 df <- dplyr::bind_rows(strategusDevOutput, strategusValOutput)
@@ -133,10 +139,12 @@ all_combinations <- expand.grid(
 
 complete_data <- merge(all_combinations, df, by = c("database_meta_data_id", "validation_database_meta_data_id","cohort_definition_id", "model_type"), all.x = TRUE)
 
-complete_data$value <- complete_data$AUROC
+```
 
-# # Cleanup any potential NA columns if they were originally in 'df' and aren't needed:
-# complete_data$value <- ifelse(is.na(complete_data$value), NA, complete_data$value)
+## Plot Discrimination AUROC
+
+```{r}
+complete_data$value <- complete_data$AUROC
 
 color_data <- complete_data %>%
   mutate(text_color = ifelse(value > 0.75 | value < 0.5, "black", "white"))
@@ -169,12 +177,10 @@ ggsave("heatmap.png", plot = p, width = 14, height = 8, dpi = 300)
 
 ```
 
-Calibration Eavg
+## Plot calibration Eavg
 
 ```{r}
-
 complete_data$value <- complete_data$Eavg
-
 
 color_data <- complete_data %>%
   mutate(text_color = ifelse(value < 0.1, "white", "black"))
@@ -206,11 +212,10 @@ print(p)
 ggsave("heatmap-eavg.png", plot = p, width = 14, height = 8, dpi = 300)
 ```
 
-Calibration AUPRC
+## Plot Calibration AUPRC
 
 ```{r}
 complete_data$value <- complete_data$AUPRC
-
 
 color_data <- complete_data %>%
   mutate(text_color = ifelse(value < 0.1, "white", "black"))
@@ -240,4 +245,48 @@ p <- ggplot(complete_data, aes(x = validation_database_meta_data_id, y = databas
 
 print(p)
 ggsave("heatmap-auprc.png", plot = p, width = 14, height = 10, dpi = 300)
+```
+
+## Save Table 1
+
+```{r}
+library(dplyr)
+library(plyr)
+library(writexl)
+library(fs)
+
+process_data <- function(data, column_name) {
+  data <- data %>%
+    mutate(across(everything(), trimws)) %>%
+    mutate(value = trimws(paste0(.[[2]], " (", .[[3]], ")"))) %>%
+    select(key = 1, value) %>%
+    slice(1:which(key == "Medication use")) %>%
+    head(-1)
+  data$value[data$value == "()"] <- ""
+  colnames(data)[2] <- column_name
+  return(data)
+}
+
+process_and_combine_data <- function(data_list, column_names) {
+  processed_frames <- mapply(process_data, data_list, column_names, SIMPLIFY = FALSE)
+  combined_data <- Reduce(function(x, y) full_join(x, y, by = "key"), processed_frames)
+  return(combined_data)
+}
+
+folder_path <- fs::path(saveFolderTable1, "models")
+file_paths <- list.files(path = folder_path, full.names = TRUE)
+column_names <- sub("\\.rds$", "", basename(file_paths))
+
+datasets <- lapply(file_paths, readRDS)
+final_data <- process_and_combine_data(datasets, column_names)
+specified_prefixes <- c("ausom", "columbia", "stanford", "ipci", "opehr", "opses")
+all_columns <- colnames(final_data)
+key_column <- "key"
+
+specified_patterns <- paste0("^", specified_prefixes)
+other_columns <- setdiff(all_columns, c(key_column, grep(paste(specified_patterns, collapse = "|"), all_columns, value = TRUE)))
+ordered_columns <- c(key_column, grep(paste(specified_patterns, collapse = "|"), all_columns, value = TRUE), other_columns)
+
+final_data <- final_data[, ordered_columns]
+write_xlsx(final_data, "dlc-table1.xlsx")
 ```
