@@ -75,8 +75,8 @@ restrictPlpDataSettings <- createRestrictPlpDataSettings(
 # dummy population settings, we use the one stored in the models
 dummyPopulationSettings <- createStudyPopulationSettings()
 
-source('https://raw.githubusercontent.com/OHDSI/PatientLevelPredictionValidationModule/main/SettingsFunctions.R')
-source('https://raw.githubusercontent.com/OHDSI/DeepPatientLevelPredictionValidationModule/main/SettingsFunctions.R')
+source('https://raw.githubusercontent.com/OHDSI/PatientLevelPredictionValidationModule/v0.0.11/SettingsFunctions.R')
+source('https://raw.githubusercontent.com/OHDSI/DeepPatientLevelPredictionValidationModule/v0.0.3/SettingsFunctions.R')
 
 validationComponentsList <- list(
   list(
