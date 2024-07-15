@@ -22,7 +22,9 @@ library(ggplot2)
 library(tidyr)
 library(dplyr)
 library(viridis)
+library(purrr)
 library(tibble)
+library(fs)
 ```
 
 Define environment variables for AWS credentials and region, if not yet defined.
@@ -43,10 +45,12 @@ region <- "eu-west-1"
 s3Folder <- "dlc-output"
 s3FolderValidation <- "dlc-output-validation"
 s3FolderTable1 <- "dlc-output-table1"
+s3FolderLearningCurve <- "dlc-output-learningcurve"
 
 saveFolder <- "~/Desktop/ohdsi-dlc-download"
 saveFolderValidation <- "~/Desktop/ohdsi-dlc-download-validation"
 saveFolderTable1 <- "~/Desktop/ohdsi-dlc-download-table1"
+saveFolderLearningCurve <- "~/Desktop/ohdsi-dlc-download-learningcurve"
 ```
 
 Download Strategus outputs from the development and validation steps.
@@ -65,6 +69,9 @@ s3SettingsTable1 <- tibble(modelZipLocation = character(), bucket = character(),
   add_row(modelZipLocation=s3FolderTable1, bucket=bucket, region=region)
 getModelsFromS3(s3SettingsTable1, saveFolderTable1)
 
+s3SettingsLearningCurve <- tibble(modelZipLocation = character(), bucket = character(), region = character()) |>
+  add_row(modelZipLocation=s3FolderLearningCurve, bucket=bucket, region=region)
+getModelsFromS3(s3SettingsLearningCurve, saveFolderLearningCurve)
 ```
 
 Format Strategus output from the development step.
@@ -177,7 +184,7 @@ ggsave("heatmap.png", plot = p, width = 14, height = 8, dpi = 300)
 
 ```
 
-## Plot calibration Eavg
+## Plot Calibration Eavg
 
 ```{r}
 complete_data$value <- complete_data$Eavg
@@ -194,7 +201,7 @@ p <- ggplot(complete_data, aes(x = validation_database_meta_data_id, y = databas
   # scale_fill_gradient(low = "white", high = "blue") +
   scale_y_discrete(expand = c(0, 0)) +
   scale_x_discrete(expand = c(0, 0)) +
-  scale_fill_viridis(name="Eavg", limits = c(0.0, 0.08), option = "D", na.value = "#F0F0F0") +
+  scale_fill_viridis(name=expression(E[avg]), limits = c(0.0, 0.08), option = "D", na.value = "#F0F0F0") +
   labs(title = NULL,
        x = "Validation database", y = "Development database", fill = expression(E[avg])) +
   coord_fixed(ratio = 1) +
@@ -289,4 +296,207 @@ ordered_columns <- c(key_column, grep(paste(specified_patterns, collapse = "|"),
 
 final_data <- final_data[, ordered_columns]
 write_xlsx(final_data, "dlc-table1.xlsx")
+```
+
+## Plot Learning Curves
+
+```{r}
+# Define the models and databases to search for
+models <- c("ResNet", "Transformer")
+databases <- c("cdm_optum_extended_ses", "cdm_optum_ehr")
+
+# Get a list of all RDS files in the directory
+file_list <- fs::dir_ls(fs::path(saveFolderLearningCurve, "models"), glob = "*.rds")
+
+# Function to find a matching substring from a list of candidates
+find_match <- function(string, candidates) {
+  for (candidate in candidates) {
+    if (grepl(candidate, string, fixed = TRUE)) {
+      return(candidate)
+    }
+  }
+  return(NA)
+}
+
+# Function to extract the number following "_O"
+extract_number <- function(string) {
+  match <- regexpr("_O\\d+", string)
+  if (match != -1) {
+    return(as.numeric(sub("_O", "", regmatches(string, match))))
+  }
+  return(NA)
+}
+
+# Function to process each file
+process_file <- function(file_path) {
+  # Extract filename without the extension
+  filename <- fs::path_file(file_path)
+  filename_without_ext <- fs::path_ext_remove(filename)
+  
+  # Find the model and database from the filename
+  model <- find_match(filename_without_ext, models)
+  database <- find_match(filename_without_ext, databases)
+  number_O <- extract_number(filename_without_ext)
+
+  # If no match is found for model, database, or number, return NULL
+  if (is.na(model) || is.na(database) || is.na(number_O)) {
+    return(NULL)
+  }
+  
+  # Read the RDS file
+  data <- readRDS(as.character(file_path))
+  
+  # Add the model, database, and number as new columns
+  data <- data %>%
+    mutate(model = model, database = database, number_O = number_O)
+  
+  return(data)
+}
+
+# Use purrr::map_df to process all files and row-bind the results
+all_data <- file_list %>%
+  map_df(~ process_file(.x), .id = "source")
+
+# Print the first few rows of the combined data frame
+print(head(all_data))
+
+# Optionally, save the combined data frame to a file
+# saveRDS(all_data, "combined_data.rds")
+
+```
+
+```{r}
+
+  learningCurve <- all_data
+
+  metric <- "AUROC"
+  abscissa <- "events"
+  plotTitle <- NULL
+  plotSubtitle = NULL
+  fileName <- NULL
+  
+  tidyLearningCurve <- NULL
+  yAxisRange <- NULL
+  y <- NULL
+  
+  learningCurve <- as.data.frame(learningCurve)
+  
+  # check for performance metric to plot
+  if(metric == "AUROC") {
+    # create a data.frame with evalautionType, AUROC
+    tidyLearningCurve <- learningCurve %>% 
+      dplyr::rename(
+        Occurrences = "Train_outcomeCount", 
+        Observations = "Train_populationSize" ) %>%
+      dplyr::select("trainFraction", "Occurrences", "Observations", "Test_AUROC", "Train_AUROC", "model", "database", "number_O")
+    
+    exclude_columns <- c("model", "database", "number_O")
+    # Loop through each column and convert to double if it's not in the exclude list
+    for (i in seq_along(tidyLearningCurve)) {
+      column_name <- names(tidyLearningCurve)[i]
+      if (!(column_name %in% exclude_columns)) {
+        tidyLearningCurve[, i] <- as.double(as.character(tidyLearningCurve[, i]))
+      }
+    }
+    
+    tidyLearningCurve <- tidyr::pivot_longer(
+      data = as.data.frame(tidyLearningCurve),
+      cols = colnames(as.data.frame(tidyLearningCurve))[!colnames(as.data.frame(tidyLearningCurve)) %in% c('trainFraction', 'Occurrences', 'Observations', "model", 'database', "number_O")], 
+      values_to = "value", 
+      names_to = 'variable'
+    )
+    
+    #tidyLearningCurve <- reshape2::melt(as.data.frame(tidyLearningCurve), id.vars = c('trainFraction', 'Occurrences', 'Observations'))
+    
+    tidyLearningCurve$Dataset <- sapply(tidyLearningCurve$variable, function(x)strsplit(as.character(x), '_')[[1]][1])
+    
+    # define plot properties
+    yAxisRange <- c(0.5, 1.0)
+    
+  } else if (metric == "AUPRC") {
+    # tidy up dataframe
+    tidyLearningCurve <- learningCurve %>% 
+      dplyr::rename(
+        Occurrences = "Train_outcomeCount", 
+        Observations = "Train_populationSize" ) %>%
+      dplyr::select("trainFraction", "Occurrences", "Observations", "Test_AUPRC", "Train_AUPRC", "model", "database")
+    
+    for(i in 1:ncol(tidyLearningCurve)){
+      tidyLearningCurve[,i] <- as.double(as.character(tidyLearningCurve[,i]))
+    }
+
+    tidyLearningCurve <- tidyr::pivot_longer(
+      data = as.data.frame(tidyLearningCurve),
+      cols = colnames(as.data.frame(tidyLearningCurve))[!colnames(as.data.frame(tidyLearningCurve)) %in% c('trainFraction', 'Occurrences', 'Observations')], 
+      values_to = "value", 
+      names_to = 'variable'
+    )
+    #tidyLearningCurve <- reshape2::melt(as.data.frame(tidyLearningCurve), id.vars = c('trainFraction', 'Occurrences', 'Observations'))
+    
+    tidyLearningCurve$Dataset <- sapply(tidyLearningCurve$variable, function(x)strsplit(as.character(x), '_')[[1]][1])
+    
+    # define plot properties
+    yAxisRange <- c(0.0, 1.0)
+    
+  } else if (metric == "sBrier") {
+    # tidy up dataframe
+    tidyLearningCurve <- learningCurve %>% 
+      dplyr::rename(
+        Occurrences = "Train_outcomeCount", 
+        Observations = "Train_populationSize" ) %>%
+      dplyr::select("trainFraction", "Occurrences", "Observations", "Test_brier score scaled", "Train_brier score scaled")
+    
+    for(i in 1:ncol(tidyLearningCurve)){
+      tidyLearningCurve[,i] <- as.double(as.character(tidyLearningCurve[,i]))
+    }
+    
+    tidyLearningCurve <- tidyr::pivot_longer(
+      data = as.data.frame(tidyLearningCurve),
+      cols = colnames(as.data.frame(tidyLearningCurve))[!colnames(as.data.frame(tidyLearningCurve)) %in% c('trainFraction', 'Occurrences', 'Observations')], 
+      values_to = "value", 
+      names_to = 'variable'
+    )
+    #tidyLearningCurve <- reshape2::melt(as.data.frame(tidyLearningCurve), id.vars = c('trainFraction', 'Occurrences', 'Observations'))
+    
+    tidyLearningCurve$Dataset <- sapply(tidyLearningCurve$variable, function(x)strsplit(as.character(x), '_')[[1]][1])
+    
+    
+    # define plot properties
+    yAxisRange <- c(0.0, 1.0)
+    
+  } else {
+    stop("An incorrect metric has been specified.")
+  }
+  
+  if (abscissa == "observations") {
+    abscissa <- "Observations"
+    abscissaLabel <- "No. of observations"
+  } else if (abscissa == "events") {
+    abscissa <- "Occurrences"
+    abscissaLabel <- "No. of events"
+  } else {
+    stop("An incorrect abscissa has been specified.")
+  }
+  
+  tidyLearningCurve <- tidyLearningCurve %>%
+    dplyr::filter(database == "cdm_optum_ehr")
+  
+  # create plot object
+  plot <- tidyLearningCurve %>%
+    ggplot2::ggplot(ggplot2::aes(x = .data[[abscissa]], y = .data[['value']],
+      col = .data[["Dataset"]])) +
+    ggplot2::geom_line() +
+    ggplot2::coord_cartesian(ylim = yAxisRange, expand = FALSE) +
+    ggplot2::labs(title = plotTitle, subtitle = plotSubtitle, 
+      x = abscissaLabel, y = metric) +
+    ggplot2::theme_light() +
+    facet_grid(number_O ~ model)
+  
+  # save plot, if fucntion call provides a file name
+  if ((!is.null(fileName)) & (is.character(fileName))) {
+    ggplot2::ggsave(fileName, plot, width = 5, height = 4.5, dpi = 400)
+  }
+  
+  plot
+
 ```
