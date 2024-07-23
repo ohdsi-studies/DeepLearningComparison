@@ -27,6 +27,7 @@ library(tibble)
 library(fs)
 library(tidyverse)
 library(scmamp)
+library(aws.s3)
 ```
 
 Define environment variables for AWS credentials and region, if not yet defined.
@@ -431,7 +432,6 @@ png("CD_small.png", width = 1920, height = 320, res = 300)
 plotCD(filtered_data, alpha = 0.05)
 dev.off()
 ```
-
 
 ## Save Table 1
 

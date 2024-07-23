@@ -1,14 +1,29 @@
 library(fs)
+library(DeepPatientLevelPrediction)
 
 # begin inputs -----------------------------------------------------------------
 
-plpDataPath <- ""
-modelsParentFolder <- ""
+OpehrDataPaths <-c()
+OpsesDataPaths <- c()
+
+OpehrModels <- ""
+OpsesModels <- ""
+
+# chose which large database to run on
+plpDataPath <- OpehrDataPaths
+
+modelsParentFolder <- OpehrModels
 device <- "cuda:0"
-trainEventCount <- c(100, 200, 300, 400, 500, 600, 700, 800, 900, 1000,
-                     1500, 2000, 2500, 3000, 5000, 7500, 10000)
+trainEventCount <- c(
+  seq(100, 900, 100),
+  seq(1000, 9000, 1000),
+  seq(10000, 90000, 10000),
+  seq(100000, 200000, 100000)
+)
 
 # end inputs -------------------------------------------------------------------
+
+loadedData <- list()
 
 modelPaths <- fs::dir_ls(path = modelsParentFolder, type = "directory", recurse = FALSE)
 
@@ -33,7 +48,11 @@ for (path in modelPaths) {
         learningRate = "auto",
         batchSize = as.numeric(pythonModel$estimator_settings$batch_size), 
         epochs = as.numeric(pythonModel$estimator_settings$epochs),
-        device = device
+        device = device,
+        earlyStopping = list(
+          useEarlyStopping = TRUE,
+          params = list(patience = 4)
+        )
       ),
       randomSample = 1
     )
@@ -52,19 +71,24 @@ for (path in modelPaths) {
         learningRate = "auto",
         batchSize = as.numeric(pythonModel$estimator_settings$batch_size), 
         epochs = as.numeric(pythonModel$estimator_settings$epochs),
-        device = device
+        device = device,
+        earlyStopping = list(
+          useEarlyStopping = TRUE,
+          params = list(patience = 4)
+        )
       ),
       randomSample = 1
     )
   }
   
-  plpData <- PatientLevelPrediction::loadPlpData(plpDataPath)
-  
-  # studyPopulation <- PatientLevelPrediction::createStudyPopulation(
-  #   plpData = plpData,
-  #   outcomeId = model$modelDesign$outcomeId,
-  #   populationSettings = model$modelDesign$populationSettings
-  # )
+  for (i in seq_along(plpDataPath)) {
+    loadedData[[i]] <- PatientLevelPrediction::loadPlpData(plpDataPath[i])
+  }
+
+  matchingIndex <- which(sapply(loadedData, function(data) {
+    outcomeIds <- data$outcomes$outcomeId
+    outcomeIds[1] == model$modelDesign$outcomeId
+  }))
   
   splitSettings <- PatientLevelPrediction::createDefaultSplitSetting(
     splitSeed = model$modelDesign$splitSettings$seed,
@@ -73,9 +97,12 @@ for (path in modelPaths) {
     trainFraction = model$modelDesign$splitSettings$train
   )
   
+  saveDir <- file.path(paste0("learningCurve_", loadedData[[matchingIndex]]$metaData$databaseDetails$cdmDatabaseSchema,"_", model$trainDetails$modelName,"_", model$modelDesign$outcomeId))
+  
   learningCurve <- PatientLevelPrediction::createLearningCurve(
-    plpData = plpData,
+    plpData = loadedData[[matchingIndex]],
     outcomeId = model$modelDesign$outcomeId,
+    saveDirectory = saveDir,
     parallel = F,
     modelSettings = modelSetting,
     populationSettings = model$modelDesign$populationSettings,
@@ -91,7 +118,13 @@ for (path in modelPaths) {
       runPreprocessData = T, # overriding the model settings
       runModelDevelopment = T, # overriding the model settings
       runCovariateSummary = F # dont need cov summary since it takes a long time
-    ),
-    learningCurveSettings = model$modelDesign$learningCurveSettings
+    )
   )
+  saveRDS(
+    learningCurve,
+    file = file.path(
+      saveDir,
+      paste0("learningCurve_", loadedData[[matchingIndex]]$metaData$databaseDetails$cdmDatabaseSchema, model$trainDetails$modelName, "_O", model$modelDesign$outcomeId, ".rds")
+      )
+    )
 }
