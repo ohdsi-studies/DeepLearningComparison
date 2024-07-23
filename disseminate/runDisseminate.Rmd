@@ -433,6 +433,179 @@ plotCD(filtered_data, alpha = 0.05)
 dev.off()
 ```
 
+## Plot Critical Difference Eavg
+
+```{r}
+
+library(tidyverse)
+library(PMCMRplus)  # For Nemenyi test
+library(reshape2)
+library(ggplot2)
+
+filtered_data <- complete_data
+filtered_data <- filtered_data %>%
+  unite("instance_id", database_meta_data_id, validation_database_meta_data_id, cohort_definition_id, remove = FALSE)
+filtered_data <- filtered_data %>%
+  filter(!is.na(Eavg)) %>%
+  select(instance_id, model_type, Eavg) %>%
+  tidyr::pivot_wider(names_from = model_type, values_from = Eavg) %>%
+  select(-instance_id)
+
+postscript("CD_all.eps", width = 7, height = 5, paper = "special", horizontal = FALSE)
+plotCD(filtered_data, alpha = 0.05, decreasing = FALSE)
+dev.off()
+
+png("CD_all.png", width = 1920, height = 320, res = 300)
+plotCD(filtered_data, alpha = 0.05, decreasing = FALSE)
+dev.off()
+
+# internal
+
+filtered_data <- complete_data
+filtered_data <- filtered_data %>%
+  unite("instance_id", database_meta_data_id, validation_database_meta_data_id, cohort_definition_id, remove = FALSE)
+
+filtered_data <- filtered_data %>%
+  filter(!is.na(Eavg)) %>%
+  filter(database_meta_data_id == validation_database_meta_data_id) %>%
+  select(instance_id, model_type, Eavg) %>%
+  tidyr::pivot_wider(names_from = model_type, values_from = Eavg) %>%
+  select(-instance_id)
+
+postscript("CD_internal.eps", width = 7, height = 5, paper = "special", horizontal = FALSE)
+plotCD(filtered_data, alpha = 0.05, decreasing = FALSE)
+dev.off()
+
+png("CD_internal.png", width = 1920, height = 320, res = 300)
+plotCD(filtered_data, alpha = 0.05, decreasing = FALSE)
+dev.off()
+
+# external
+
+filtered_data <- complete_data
+filtered_data <- filtered_data %>%
+  unite("instance_id", database_meta_data_id, validation_database_meta_data_id, cohort_definition_id, remove = FALSE)
+
+filtered_data <- filtered_data %>%
+  filter(!is.na(Eavg)) %>%
+  filter(database_meta_data_id != validation_database_meta_data_id) %>%
+  select(instance_id, model_type, Eavg) %>%
+  tidyr::pivot_wider(names_from = model_type, values_from = Eavg) %>%
+  select(-instance_id)
+
+postscript("CD_external.eps", width = 7, height = 5, paper = "special", horizontal = FALSE)
+plotCD(filtered_data, alpha = 0.05, decreasing = FALSE)
+dev.off()
+
+png("CD_external.png", width = 1920, height = 320, res = 300)
+plotCD(filtered_data, alpha = 0.05, decreasing = FALSE)
+dev.off()
+
+# dementia
+
+filtered_data <- complete_data
+filtered_data <- filtered_data %>%
+  unite("instance_id", database_meta_data_id, validation_database_meta_data_id, cohort_definition_id, remove = FALSE)
+
+filtered_data <- filtered_data %>%
+  filter(!is.na(Eavg)) %>%
+  filter(cohort_definition_id == "Dementia") %>%
+  select(instance_id, model_type, Eavg) %>%
+  tidyr::pivot_wider(names_from = model_type, values_from = Eavg) %>%
+  select(-instance_id)
+
+postscript("CD_dementia.eps", width = 7, height = 5, paper = "special", horizontal = FALSE)
+plotCD(filtered_data, alpha = 0.05, decreasing = FALSE)
+dev.off()
+
+png("CD_dementia.png", width = 1920, height = 320, res = 300)
+plotCD(filtered_data, alpha = 0.05, decreasing = FALSE)
+dev.off()
+
+# bipolar
+
+filtered_data <- complete_data
+filtered_data <- filtered_data %>%
+  unite("instance_id", database_meta_data_id, validation_database_meta_data_id, cohort_definition_id, remove = FALSE)
+
+filtered_data <- filtered_data %>%
+  filter(!is.na(Eavg)) %>%
+  filter(cohort_definition_id == "Bipolar disorder") %>%
+  select(instance_id, model_type, Eavg) %>%
+  tidyr::pivot_wider(names_from = model_type, values_from = Eavg) %>%
+  select(-instance_id)
+
+postscript("CD_bipolar.eps", width = 7, height = 5, paper = "special", horizontal = FALSE)
+plotCD(filtered_data, alpha = 0.05, decreasing = FALSE)
+dev.off()
+
+png("CD_bipolar.png", width = 1920, height = 320, res = 300)
+plotCD(filtered_data, alpha = 0.05, decreasing = FALSE)
+dev.off()
+
+# lung cancer
+
+filtered_data <- complete_data
+filtered_data <- filtered_data %>%
+  unite("instance_id", database_meta_data_id, validation_database_meta_data_id, cohort_definition_id, remove = FALSE)
+
+filtered_data <- filtered_data %>%
+  filter(!is.na(Eavg)) %>%
+  filter(cohort_definition_id == "Lung cancer") %>%
+  select(instance_id, model_type, Eavg) %>%
+  tidyr::pivot_wider(names_from = model_type, values_from = Eavg) %>%
+  select(-instance_id)
+
+postscript("CD_lungcancer.eps", width = 7, height = 5, paper = "special", horizontal = FALSE)
+plotCD(filtered_data, alpha = 0.05, decreasing = FALSE)
+dev.off()
+
+png("CD_lungcancer.png", width = 1920, height = 320, res = 300)
+plotCD(filtered_data, alpha = 0.05, decreasing = FALSE)
+dev.off()
+
+# large data
+
+filtered_data <- complete_data
+filtered_data <- filtered_data %>%
+  unite("instance_id", database_meta_data_id, validation_database_meta_data_id, cohort_definition_id, remove = FALSE)
+
+filtered_data <- filtered_data %>%
+  filter(!is.na(Eavg)) %>%
+  filter(database_meta_data_id == "OPEHR" | validation_database_meta_data_id == "OPSES") %>%
+  select(instance_id, model_type, Eavg) %>%
+  tidyr::pivot_wider(names_from = model_type, values_from = Eavg) %>%
+  select(-instance_id)
+
+postscript("CD_large.eps", width = 7, height = 5, paper = "special", horizontal = FALSE)
+plotCD(filtered_data, alpha = 0.05, decreasing = FALSE)
+dev.off()
+
+png("CD_large.png", width = 1920, height = 320, res = 300)
+plotCD(filtered_data, alpha = 0.05, decreasing = FALSE)
+dev.off()
+
+# small data
+filtered_data <- complete_data
+filtered_data <- filtered_data %>%
+  unite("instance_id", database_meta_data_id, validation_database_meta_data_id, cohort_definition_id, remove = FALSE)
+
+filtered_data <- filtered_data %>%
+  filter(!is.na(Eavg)) %>%
+  filter(database_meta_data_id != "OPEHR" | validation_database_meta_data_id != "OPSES") %>%
+  select(instance_id, model_type, Eavg) %>%
+  tidyr::pivot_wider(names_from = model_type, values_from = Eavg) %>%
+  select(-instance_id)
+
+postscript("CD_small.eps", width = 7, height = 5, paper = "special", horizontal = FALSE)
+plotCD(filtered_data, alpha = 0.05, decreasing = FALSE)
+dev.off()
+
+png("CD_small.png", width = 1920, height = 320, res = 300)
+plotCD(filtered_data, alpha = 0.05, decreasing = FALSE)
+dev.off()
+```
+
 ## Save Table 1
 
 ```{r}
@@ -620,6 +793,6 @@ plot <- tidyLearningCurve %>%
   
 plot
 
-ggplot2::ggsave("lc.png", plot, width = 10, height = 6, dpi = 300)
+ggplot2::ggsave("lc.png", plot, width = 8, height = 4, dpi = 300)
 
 ```
