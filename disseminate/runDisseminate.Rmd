@@ -799,6 +799,13 @@ tidyLearningCurve <- tidyLearningCurve %>%
     database %in% c("cdm_optum_ehr") ~ "OPEHR",
     database %in% c("cdm_optum_extended_ses") ~ "OPSES",
     TRUE ~ "Data Error"
+  )) %>%
+  mutate(Model = case_when(
+    Model %in% c("ResNet") ~ "ResNet",
+    Model %in% c("Transformer") ~ "Transformer",
+    Model %in% c("fitXgboost") ~ "XGBoost",
+    Model %in% c("logistic") ~ "Logistic regression",
+    TRUE ~ "Data Error"
   ))
   
 tidyLearningCurve <- tidyr::pivot_longer(
@@ -810,10 +817,11 @@ tidyLearningCurve <- tidyr::pivot_longer(
 
 tidyLearningCurve$Dataset <- sapply(tidyLearningCurve$variable, function(x)strsplit(as.character(x), '_')[[1]][1])
 tidyLearningCurve$outcome <- factor(tidyLearningCurve$outcome, levels = c("Lung cancer", "Dementia", "Bipolar disorder"))
+tidyLearningCurve$Model <- factor(tidyLearningCurve$Model, levels = c("Logistic regression", "XGBoost", "ResNet", "Transformer"))
 
 # define plot properties
 yAxisRange <- c(0.5, 1.0)
-xAxisRange <- c(0.0, 10000)
+xAxisRange <- c(0.0, 20000)
 
 abscissa <- "Occurrences"
 abscissaLabel <- "Outcome count"
