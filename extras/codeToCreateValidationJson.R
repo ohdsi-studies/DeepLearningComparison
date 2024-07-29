@@ -73,11 +73,11 @@ source('https://raw.githubusercontent.com/OHDSI/DeepPatientLevelPredictionValida
 
 validationComponentsList <- list(
   list(
-    targetId = cohortIds$dementia$target,
-    oucomeId = cohortIds$dementia$outcome,
-    restrictPlpDataSettings = NULL,
+    targetId = NULL, # use model setting
+    oucomeId = NULL, # use model setting
+    restrictPlpDataSettings = NULL, # use model setting
     validationSettings = PatientLevelPrediction::createValidationSettings(
-      recalibrate = NULL,
+      recalibrate = NULL, # use model setting
       runCovariateSummary = T
     ),
     populationSettings = NULL  
