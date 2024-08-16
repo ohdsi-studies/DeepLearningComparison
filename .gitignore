@@ -5,3 +5,7 @@
 renv/
 testStudy.R
 docker/my_secrets.env
+disseminate/*.png
+disseminate/*.eps
+disseminate/*.svg
+disseminate/*.xlsx
