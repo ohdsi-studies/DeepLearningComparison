@@ -189,6 +189,55 @@ ggsave("heatmap.png", plot = p, width = 14, height = 8, dpi = 300)
 
 ```
 
+## Plot Discrimination AUROC with CI
+
+```{r}
+complete_data$value <- complete_data$AUROC
+
+color_data <- complete_data %>%
+  mutate(text_color = ifelse(value > 0.75 | value < 0.5, "black", "white"))
+
+# Add text formatting for the heatmap cells
+complete_data <- complete_data %>%
+  mutate(
+    value_label = ifelse(is.na(value), NA,
+                         sprintf("%.2f\n(%.2f,%.2f)", value, `95% lower AUROC`, `95% upper AUROC`)),
+    text_color = ifelse(value > 0.75 | value < 0.5, "black", "white")
+  )
+
+p <- ggplot(complete_data, aes(x = validation_database_meta_data_id, y = database_meta_data_id, fill = value)) +
+  geom_tile(na.rm = FALSE) +
+  geom_text(aes(label = value_label), 
+            color = complete_data$text_color, 
+            vjust = 0.5, 
+            hjust = 0.5, 
+            size = 1.75,  # Smaller font size for labels
+            lineheight = 0.8,  # Closer text lines
+            na.rm = TRUE) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  scale_y_discrete(expand = c(0, 0)) +
+  scale_x_discrete(expand = c(0, 0)) +
+  scale_fill_viridis(name = "AUROC", limits = c(0.5, 1.0), option = "D", na.value = "#F0F0F0") +
+  labs(title = NULL,
+       x = "Validation database", y = "Development database", fill = "AUROC") +
+  coord_fixed(ratio = 0.5) +  # Adjust the aspect ratio to make tiles twice as wide (1:0.5 ratio)
+  theme(legend.position = "bottom", 
+        legend.direction = "horizontal",
+        legend.text = element_text(hjust = 0.5),  # Centering text within the legend keys
+        legend.title = element_text(hjust = 0.5),  # Horizontal justification (centered)
+        legend.key.width = grid::unit(2, "cm"),  # Adjust key width
+        legend.key.height = grid::unit(0.3, "cm"),  # Adjust key height
+        legend.spacing.x = grid::unit(1, "cm"),  # Adjust spacing between keys
+        legend.box.margin = margin(6, 6, 6, 6)) +
+  guides(fill = guide_colorbar(nrow = 1, byrow = TRUE, title.position = "top", label.position = "bottom")) +
+  facet_grid(cohort_definition_id ~ model_type)
+
+print(p)
+ggsave("heatmap.png", plot = p, width = 18, height = 12, dpi = 300)
+
+```
+
 ## Plot Calibration Eavg
 
 ```{r}
@@ -304,6 +353,10 @@ png("CD_all.png", width = 1920, height = 320, res = 300)
 plotCD(filtered_data, alpha = 0.05)
 dev.off()
 
+svg("CD_all.svg", width = 7, height = 1.1666666666666666666666666666)
+plotCD(filtered_data, alpha = 0.05)
+dev.off()
+
 # internal
 
 filtered_data <- complete_data
@@ -326,6 +379,11 @@ dev.off()
 png("CD_internal.png", width = 1920, height = 320, res = 300)
 plotCD(filtered_data, alpha = 0.05)
 dev.off()
+
+svg("CD_internal.svg", width = 7, height = 1.1666666666666666666666666666)
+plotCD(filtered_data, alpha = 0.05)
+dev.off()
+
 
 # external
 
@@ -350,72 +408,7 @@ png("CD_external.png", width = 1920, height = 320, res = 300)
 plotCD(filtered_data, alpha = 0.05)
 dev.off()
 
-# dementia
-
-filtered_data <- complete_data
-filtered_data <- filtered_data %>%
-  unite("instance_id", database_meta_data_id, validation_database_meta_data_id, cohort_definition_id, remove = FALSE)
-
-filtered_data <- filtered_data %>%
-  filter(!is.na(AUROC)) %>%
-  filter(cohort_definition_id == "Dementia") %>%
-  select(instance_id, model_type, AUROC) %>%
-  tidyr::pivot_wider(names_from = model_type, values_from = AUROC) %>%
-  select(-instance_id)
-
-friedman_test_result <- scmamp::friedmanTest(as.matrix(filtered_data))
-
-postscript("CD_dementia.eps", width = 7, height = 5, paper = "special", horizontal = FALSE)
-plotCD(filtered_data, alpha = 0.05)
-dev.off()
-
-png("CD_dementia.png", width = 1920, height = 320, res = 300)
-plotCD(filtered_data, alpha = 0.05)
-dev.off()
-
-# bipolar
-
-filtered_data <- complete_data
-filtered_data <- filtered_data %>%
-  unite("instance_id", database_meta_data_id, validation_database_meta_data_id, cohort_definition_id, remove = FALSE)
-
-filtered_data <- filtered_data %>%
-  filter(!is.na(AUROC)) %>%
-  filter(cohort_definition_id == "Bipolar disorder") %>%
-  select(instance_id, model_type, AUROC) %>%
-  tidyr::pivot_wider(names_from = model_type, values_from = AUROC) %>%
-  select(-instance_id)
-
-friedman_test_result <- scmamp::friedmanTest(as.matrix(filtered_data))
-
-postscript("CD_bipolar.eps", width = 7, height = 5, paper = "special", horizontal = FALSE)
-plotCD(filtered_data, alpha = 0.05)
-dev.off()
-
-png("CD_bipolar.png", width = 1920, height = 320, res = 300)
-plotCD(filtered_data, alpha = 0.05)
-dev.off()
-
-# lung cancer
-
-filtered_data <- complete_data
-filtered_data <- filtered_data %>%
-  unite("instance_id", database_meta_data_id, validation_database_meta_data_id, cohort_definition_id, remove = FALSE)
-
-filtered_data <- filtered_data %>%
-  filter(!is.na(AUROC)) %>%
-  filter(cohort_definition_id == "Lung cancer") %>%
-  select(instance_id, model_type, AUROC) %>%
-  tidyr::pivot_wider(names_from = model_type, values_from = AUROC) %>%
-  select(-instance_id)
-
-friedman_test_result <- scmamp::friedmanTest(as.matrix(filtered_data))
-
-postscript("CD_lungcancer.eps", width = 7, height = 5, paper = "special", horizontal = FALSE)
-plotCD(filtered_data, alpha = 0.05)
-dev.off()
-
-png("CD_lungcancer.png", width = 1920, height = 320, res = 300)
+svg("CD_external.svg", width = 7, height = 1.1666666666666666666666666666)
 plotCD(filtered_data, alpha = 0.05)
 dev.off()
 
@@ -442,6 +435,10 @@ png("CD_large.png", width = 1920, height = 320, res = 300)
 plotCD(filtered_data, alpha = 0.05)
 dev.off()
 
+svg("CD_large.svg", width = 7, height = 1.1666666666666666666666666666)
+plotCD(filtered_data, alpha = 0.05)
+dev.off()
+
 # small data
 filtered_data <- complete_data
 filtered_data <- filtered_data %>%
@@ -461,6 +458,10 @@ plotCD(filtered_data, alpha = 0.05)
 dev.off()
 
 png("CD_small.png", width = 1920, height = 320, res = 300)
+plotCD(filtered_data, alpha = 0.05)
+dev.off()
+
+svg("CD_small.svg", width = 7, height = 1.1666666666666666666666666666)
 plotCD(filtered_data, alpha = 0.05)
 dev.off()
 ```
@@ -485,11 +486,15 @@ filtered_data <- filtered_data %>%
   select(-instance_id)
 friedman_test_result <- scmamp::friedmanTest(as.matrix(filtered_data))
 
-postscript("CD_all.eps", width = 7, height = 5, paper = "special", horizontal = FALSE)
+postscript("CD_eavg_all.eps", width = 7, height = 5, paper = "special", horizontal = FALSE)
 plotCD(filtered_data, alpha = 0.05, decreasing = FALSE)
 dev.off()
 
-png("CD_all.png", width = 1920, height = 320, res = 300)
+png("CD_eavg_all.png", width = 1920, height = 320, res = 300)
+plotCD(filtered_data, alpha = 0.05, decreasing = FALSE)
+dev.off()
+
+svg("CD_eavg_all.svg", width = 7, height = 1.1666666666666666666666666666)
 plotCD(filtered_data, alpha = 0.05, decreasing = FALSE)
 dev.off()
 
@@ -507,11 +512,15 @@ filtered_data <- filtered_data %>%
   select(-instance_id)
 friedman_test_result <- scmamp::friedmanTest(as.matrix(filtered_data))
 
-postscript("CD_internal.eps", width = 7, height = 5, paper = "special", horizontal = FALSE)
+postscript("CD_eavg_internal.eps", width = 7, height = 5, paper = "special", horizontal = FALSE)
 plotCD(filtered_data, alpha = 0.05, decreasing = FALSE)
 dev.off()
 
-png("CD_internal.png", width = 1920, height = 320, res = 300)
+png("CD_eavg_internal.png", width = 1920, height = 320, res = 300)
+plotCD(filtered_data, alpha = 0.05, decreasing = FALSE)
+dev.off()
+
+svg("CD_eavg_internal.svg", width = 7, height = 1.1666666666666666666666666666)
 plotCD(filtered_data, alpha = 0.05, decreasing = FALSE)
 dev.off()
 
@@ -529,77 +538,15 @@ filtered_data <- filtered_data %>%
   select(-instance_id)
 friedman_test_result <- scmamp::friedmanTest(as.matrix(filtered_data))
 
-postscript("CD_external.eps", width = 7, height = 5, paper = "special", horizontal = FALSE)
+postscript("CD_eavg_external.eps", width = 7, height = 5, paper = "special", horizontal = FALSE)
 plotCD(filtered_data, alpha = 0.05, decreasing = FALSE)
 dev.off()
 
-png("CD_external.png", width = 1920, height = 320, res = 300)
+png("CD_eavg_external.png", width = 1920, height = 320, res = 300)
 plotCD(filtered_data, alpha = 0.05, decreasing = FALSE)
 dev.off()
 
-# dementia
-
-filtered_data <- complete_data
-filtered_data <- filtered_data %>%
-  unite("instance_id", database_meta_data_id, validation_database_meta_data_id, cohort_definition_id, remove = FALSE)
-
-filtered_data <- filtered_data %>%
-  filter(!is.na(Eavg)) %>%
-  filter(cohort_definition_id == "Dementia") %>%
-  select(instance_id, model_type, Eavg) %>%
-  tidyr::pivot_wider(names_from = model_type, values_from = Eavg) %>%
-  select(-instance_id)
-friedman_test_result <- scmamp::friedmanTest(as.matrix(filtered_data))
-
-postscript("CD_dementia.eps", width = 7, height = 5, paper = "special", horizontal = FALSE)
-plotCD(filtered_data, alpha = 0.05, decreasing = FALSE)
-dev.off()
-
-png("CD_dementia.png", width = 1920, height = 320, res = 300)
-plotCD(filtered_data, alpha = 0.05, decreasing = FALSE)
-dev.off()
-
-# bipolar
-
-filtered_data <- complete_data
-filtered_data <- filtered_data %>%
-  unite("instance_id", database_meta_data_id, validation_database_meta_data_id, cohort_definition_id, remove = FALSE)
-
-filtered_data <- filtered_data %>%
-  filter(!is.na(Eavg)) %>%
-  filter(cohort_definition_id == "Bipolar disorder") %>%
-  select(instance_id, model_type, Eavg) %>%
-  tidyr::pivot_wider(names_from = model_type, values_from = Eavg) %>%
-  select(-instance_id)
-friedman_test_result <- scmamp::friedmanTest(as.matrix(filtered_data))
-
-postscript("CD_bipolar.eps", width = 7, height = 5, paper = "special", horizontal = FALSE)
-plotCD(filtered_data, alpha = 0.05, decreasing = FALSE)
-dev.off()
-
-png("CD_bipolar.png", width = 1920, height = 320, res = 300)
-plotCD(filtered_data, alpha = 0.05, decreasing = FALSE)
-dev.off()
-
-# lung cancer
-
-filtered_data <- complete_data
-filtered_data <- filtered_data %>%
-  unite("instance_id", database_meta_data_id, validation_database_meta_data_id, cohort_definition_id, remove = FALSE)
-
-filtered_data <- filtered_data %>%
-  filter(!is.na(Eavg)) %>%
-  filter(cohort_definition_id == "Lung cancer") %>%
-  select(instance_id, model_type, Eavg) %>%
-  tidyr::pivot_wider(names_from = model_type, values_from = Eavg) %>%
-  select(-instance_id)
-friedman_test_result <- scmamp::friedmanTest(as.matrix(filtered_data))
-
-postscript("CD_lungcancer.eps", width = 7, height = 5, paper = "special", horizontal = FALSE)
-plotCD(filtered_data, alpha = 0.05, decreasing = FALSE)
-dev.off()
-
-png("CD_lungcancer.png", width = 1920, height = 320, res = 300)
+svg("CD_eavg_external.svg", width = 7, height = 1.1666666666666666666666666666)
 plotCD(filtered_data, alpha = 0.05, decreasing = FALSE)
 dev.off()
 
@@ -617,11 +564,15 @@ filtered_data <- filtered_data %>%
   select(-instance_id)
 friedman_test_result <- scmamp::friedmanTest(as.matrix(filtered_data))
 
-postscript("CD_large.eps", width = 7, height = 5, paper = "special", horizontal = FALSE)
+postscript("CD_eavg_large.eps", width = 7, height = 5, paper = "special", horizontal = FALSE)
 plotCD(filtered_data, alpha = 0.05, decreasing = FALSE)
 dev.off()
 
-png("CD_large.png", width = 1920, height = 320, res = 300)
+png("CD_eavg_large.png", width = 1920, height = 320, res = 300)
+plotCD(filtered_data, alpha = 0.05, decreasing = FALSE)
+dev.off()
+
+svg("CD_eavg_large.svg", width = 7, height = 1.1666666666666666666666666666)
 plotCD(filtered_data, alpha = 0.05, decreasing = FALSE)
 dev.off()
 
@@ -638,11 +589,40 @@ filtered_data <- filtered_data %>%
   select(-instance_id)
 friedman_test_result <- scmamp::friedmanTest(as.matrix(filtered_data))
 
-postscript("CD_small.eps", width = 7, height = 5, paper = "special", horizontal = FALSE)
+postscript("CD_eavg_small.eps", width = 7, height = 5, paper = "special", horizontal = FALSE)
 plotCD(filtered_data, alpha = 0.05, decreasing = FALSE)
 dev.off()
 
-png("CD_small.png", width = 1920, height = 320, res = 300)
+png("CD_eavg_small.png", width = 1920, height = 320, res = 300)
+plotCD(filtered_data, alpha = 0.05, decreasing = FALSE)
+dev.off()
+
+svg("CD_eavg_small.svg", width = 7, height = 1.1666666666666666666666666666)
+plotCD(filtered_data, alpha = 0.05, decreasing = FALSE)
+dev.off()
+
+# good models data
+filtered_data <- complete_data
+filtered_data <- filtered_data %>%
+  unite("instance_id", database_meta_data_id, validation_database_meta_data_id, cohort_definition_id, remove = FALSE)
+
+filtered_data <- filtered_data %>%
+  filter(!is.na(Eavg)) %>%
+  filter(AUROC >= 0.7) %>%
+  select(instance_id, model_type, Eavg) %>%
+  tidyr::pivot_wider(names_from = model_type, values_from = Eavg) %>%
+  select(-instance_id)
+friedman_test_result <- scmamp::friedmanTest(as.matrix(filtered_data))
+
+postscript("CD_eavg_good.eps", width = 7, height = 5, paper = "special", horizontal = FALSE)
+plotCD(filtered_data, alpha = 0.05, decreasing = FALSE)
+dev.off()
+
+png("CD_eavg_good.png", width = 1920, height = 320, res = 300)
+plotCD(filtered_data, alpha = 0.05, decreasing = FALSE)
+dev.off()
+
+svg("CD_eavg_good.svg", width = 7, height = 1.1666666666666666666666666666)
 plotCD(filtered_data, alpha = 0.05, decreasing = FALSE)
 dev.off()
 ```
