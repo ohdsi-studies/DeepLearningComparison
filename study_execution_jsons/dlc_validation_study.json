@@ -43,15 +43,13 @@
       "remoteRepo": "github.com",
       "remoteUsername": "ohdsi",
       "settings": {
-        "s3Settings": {
-          "modelZipLocation": "dlc-output",
-          "bucket": "s3://ohdsi-dlc/",
-          "region": "eu-west-1",
+        "localFileSettings": {
+          "locations": "/models/models",
           "attr_class": ["tbl_df", "tbl", "data.frame"],
           "attr_row.names": 1
         },
         "githubSettings": null,
-        "localFileSettings": null
+        "s3Settings": null
       },
       "attr_class": ["ModelTransferModuleSpecifications", "ModuleSpecifications"]
     },

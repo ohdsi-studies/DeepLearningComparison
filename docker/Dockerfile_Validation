@@ -55,10 +55,29 @@ RUN Rscript -e "renv::restore()" \
     && rm -rf /root/.cache/R/renv \
     && /opt/conda/bin/conda clean -afy
 
+# download models to validate into container
+ENV AWS_ACCESS_KEY_ID=
+ENV AWS_SECRET_ACCESS_KEY=
+ENV AWS_DEFAULT_REGION=eu-west-1
+WORKDIR /modules/ModelTransferModule_0.0.10/
+RUN mkdir /models
+RUN Rscript -e "renv::activate('.')" \
+    -e "source('Main.R')" \
+    -e "getModelsFromS3( \
+         data.frame( \
+           modelZipLocation = 'dlc-output', \
+           bucket = 's3://ohdsi-dlc/', \
+           region = 'eu-west-1', \
+           stringsAsFactors = FALSE \
+         ), \
+         '/models/' \
+       )"
+
 FROM docker.io/rocker/r-ver:4.2.3
 
 COPY --from=build /project /project
 COPY --from=build /modules /modules
+COPY --from=build /models /models
 COPY --from=build /opt/conda /opt/conda
 COPY --from=build /database_drivers /database_drivers
 COPY --from=build /usr/local/lib/R/site-library /usr/local/lib/R/site-library
@@ -75,7 +94,8 @@ RUN apt-get -y update && apt-get install -y \
       && R cmd javareconf \
       && apt-get clean
 
-RUN mkdir /output
+# permissions required for copying models
+RUN mkdir -p /output
 
 # create system keyring
 WORKDIR /project
