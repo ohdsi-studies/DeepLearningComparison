@@ -1,21 +1,22 @@
-# Deep Learning Comparison - Docker
+# Deep Learning Comparison - Docker {#deep-learning-comparison---docker}
 
 The study consists of three separate analyses that can be executed using Docker containers. - **Table 1** - Produces Table 1 for a scientific article, providing a summary of demographic characteristics and comorbidities of the target populations. - **Model Development** - Trains conventional and deep learning models for the target populations. - **Model Validation** - Validates conventional and deep learning models that have been developed on other databases.
 
 ## Content
-- [Deep Learning Comparison - Docker](#deep-learning-comparison---docker)
-  - [Preparation](#preparation)
-    - [Connection and execution details](#connection-and-execution-details)
-    - [Hardware acceleration](#hardware-acceleration)
-  - [Execute study](#execute-study)
-    - [Run Table 1 Analysis](#run-table-1-analysis)
-    - [Run Model Development](#run-model-development)
-    - [Run Model Validation](#run-model-validation)
-  - [Share results](#share-results)
 
-## Preparation
+-   [Deep Learning Comparison - Docker](#deep-learning-comparison---docker)
+    -   [Preparation](#preparation)
+        -   [Connection and execution details](#connection-and-execution-details)
+        -   [Hardware acceleration](#hardware-acceleration)
+    -   [Execute study](#execute-study)
+        -   [Run Table 1 Analysis](#run-table-1-analysis)
+        -   [Run Model Development](#run-model-development)
+        -   [Run Model Validation](#run-model-validation)
+    -   [Share results](#share-results)
 
-### Connection and execution details
+## Preparation {#preparation}
+
+### Connection and execution details {#connection-and-execution-details}
 
 To run the analyses you must specify connection and execution parameters in a `secrets.env` file. This can be done by creating a text file named `secrets.env` or by downloading our template from [here](https://github.com/ohdsi-studies/DeepLearningComparison/blob/master/docker/secrets.env). Below is the format for `secrets.env`, exemplified with a sample database configuration.
 
@@ -35,16 +36,11 @@ CDM_SCHEMA=cdm_schema
 
 # only required for table 1
 TABLE1_COHORT_TABLE=table1_cohort_table
-
-# only required for validation
-AWS_ACCESS_KEY_ID=
-AWS_SECRET_ACCESS_KEY=
-AWS_DEFAULT_REGION=
 ```
 
-Leave those fields empty that you don't use when connecting to your database. The AWS credentials are only required for the validation step and can be obtained from the study coordinator.
+Leave those fields empty that you don't use when connecting to your database.
 
-### Hardware acceleration
+### Hardware acceleration {#hardware-acceleration}
 
 We recommend to execute the study on a GPU as this will significantly reduce execution time.
 
@@ -52,9 +48,9 @@ To enable GPU support with Docker, please install the NVIDIA Container Toolkit b
 
 If using Podman with GPUs, refer to the Container Device Interface guidelines here: <https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/cdi-support.html>
 
-## Execute study
+## Execute study {#execute-study}
 
-### Run Table 1 Analysis
+### Run Table 1 Analysis {#run-table-1-analysis}
 
 Download the latest version of the Table 1 Docker container.
 
@@ -86,7 +82,7 @@ bipolar_table1 <- readRDS('/host/output/folder/bipolar.rds')
 
 Inspect the three files in your R environment before sharing them with us as described [here](#share-results).
 
-### Run Model Development
+### Run Model Development {#run-model-development}
 
 Download the latest version of the Development Docker container.
 
@@ -118,7 +114,7 @@ If you want to run it using a different container runtime and need help please o
 
 In the output directory, the analysis generates three folders. Compress and share the `strategusOutput` folder as described [here](#share-results).
 
-### Run Model Validation
+### Run Model Validation {#run-model-validation}
 
 Download the latest version of the Validation Docker container.
 
@@ -165,7 +161,7 @@ source('codeToRunValidation.R')
 
 In the validation output directory, the analysis generates three folders. Compress and share the `strategusOutput` folder as described [here](#share-results).
 
-## Share Results
+## Share Results {#share-results}
 
 The result files are generated using the OHDSI pipeline, which ensures that only non-identifying data is included in the output files. Nevertheless, before sharing any results with us, we kindly ask you to double-check that the files do not contain any data that you are not permitted to share. To securely share the results with the study coordinator, we use the `OhdsiSharing` R package. We suggest to compress multiple result files into a Zip archive.
 
