@@ -156,7 +156,7 @@ complete_data <- merge(all_combinations, df, by = c("database_meta_data_id", "va
 ## Plot Discrimination AUROC
 
 ```{r}
-complete_data$value <- complete_data$AUROC
+complete_data$value <- round(complete_data$AUROC, 2)
 
 color_data <- complete_data %>%
   mutate(text_color = ifelse(value > 0.75 | value < 0.5, "black", "white"))
@@ -801,7 +801,7 @@ tidyLearningCurve$Model <- factor(tidyLearningCurve$Model, levels = c("Logistic 
 
 # define plot properties
 yAxisRange <- c(0.5, 1.0)
-xAxisRange <- c(0.0, 20000)
+xAxisRange <- c(0.0, 10000)
 
 abscissa <- "Occurrences"
 abscissaLabel <- "Outcome count"
