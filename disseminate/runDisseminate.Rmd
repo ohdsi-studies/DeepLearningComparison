@@ -111,8 +111,8 @@ df <- df %>%
     TRUE ~ "Data Error"
   )) %>%
   mutate(database_meta_data_id = case_when(
-    database_meta_data_id %in% c(-1410378758) ~ "OPEHR",
-    database_meta_data_id %in% c(1463865175) ~ "OPSES",
+    database_meta_data_id %in% c(-1410378758) ~ "Optum EHR",
+    database_meta_data_id %in% c(1463865175) ~ "Clinformatics",
     database_meta_data_id %in% c(-795494529) ~ "AUSOM",
     database_meta_data_id %in% c(2139891622) ~ "IPCI",
     database_meta_data_id %in% c(1484143096) ~ "STARR-OMOP",
@@ -125,8 +125,8 @@ df <- df %>%
     TRUE ~ "Data Error"
   )) %>%
   mutate(validation_database_meta_data_id = case_when(
-    validation_database_meta_data_id %in% c(-1410378758) ~ "OPEHR",
-    validation_database_meta_data_id %in% c(1463865175) ~ "OPSES",
+    validation_database_meta_data_id %in% c(-1410378758) ~ "Optum EHR",
+    validation_database_meta_data_id %in% c(1463865175) ~ "Clinformatics",
     validation_database_meta_data_id %in% c(-795494529) ~ "AUSOM",
     validation_database_meta_data_id %in% c(2139891622) ~ "IPCI",
     validation_database_meta_data_id %in% c(1484143096) ~ "STARR-OMOP",
@@ -139,7 +139,10 @@ df <- df %>%
     TRUE ~ "Data Error"
   ))
 
-  
+# remove validation on AUSOM bipolar due to too few outcomes
+df <- df %>%
+  filter(!(validation_database_meta_data_id == "AUSOM" & cohort_definition_id == "Bipolar disorder"))
+
 all_combinations <- expand.grid(
   database_meta_data_id = unique(df$database_meta_data_id),
   cohort_definition_id = unique(df$cohort_definition_id),
@@ -329,7 +332,7 @@ ggsave("heatmap-auprc.png", plot = p, width = 14, height = 10, dpi = 300)
 ```{r}
 
 library(tidyverse)
-library(PMCMRplus)  # For Nemenyi test
+# library(PMCMRplus)  # For Nemenyi test
 library(reshape2)
 library(scmamp)
 library(ggplot2)
@@ -420,7 +423,7 @@ filtered_data <- filtered_data %>%
 
 filtered_data <- filtered_data %>%
   filter(!is.na(AUROC)) %>%
-  filter(database_meta_data_id == "OPEHR" | validation_database_meta_data_id == "OPSES") %>%
+  filter(database_meta_data_id == "Optume EHR" | validation_database_meta_data_id == "Clinformatics") %>%
   select(instance_id, model_type, AUROC) %>%
   tidyr::pivot_wider(names_from = model_type, values_from = AUROC) %>%
   select(-instance_id)
@@ -446,7 +449,7 @@ filtered_data <- filtered_data %>%
 
 filtered_data <- filtered_data %>%
   filter(!is.na(AUROC)) %>%
-  filter(database_meta_data_id != "OPEHR" | validation_database_meta_data_id != "OPSES") %>%
+  filter(database_meta_data_id != "Optum EHR" | validation_database_meta_data_id != "Clinformatics") %>%
   select(instance_id, model_type, AUROC) %>%
   tidyr::pivot_wider(names_from = model_type, values_from = AUROC) %>%
   select(-instance_id)
@@ -471,7 +474,7 @@ dev.off()
 ```{r}
 
 library(tidyverse)
-library(PMCMRplus)  # For Nemenyi test
+# library(PMCMRplus)  # For Nemenyi test
 library(reshape2)
 library(scmamp)
 library(ggplot2)
@@ -558,7 +561,7 @@ filtered_data <- filtered_data %>%
 
 filtered_data <- filtered_data %>%
   filter(!is.na(Eavg)) %>%
-  filter(database_meta_data_id == "OPEHR" | validation_database_meta_data_id == "OPSES") %>%
+  filter(database_meta_data_id == "Optum EHR" | validation_database_meta_data_id == "Clinformatics") %>%
   select(instance_id, model_type, Eavg) %>%
   tidyr::pivot_wider(names_from = model_type, values_from = Eavg) %>%
   select(-instance_id)
@@ -583,7 +586,7 @@ filtered_data <- filtered_data %>%
 
 filtered_data <- filtered_data %>%
   filter(!is.na(Eavg)) %>%
-  filter(database_meta_data_id != "OPEHR" | validation_database_meta_data_id != "OPSES") %>%
+  filter(database_meta_data_id != "Optum EHR" | validation_database_meta_data_id != "Clinformatics") %>%
   select(instance_id, model_type, Eavg) %>%
   tidyr::pivot_wider(names_from = model_type, values_from = Eavg) %>%
   select(-instance_id)
@@ -776,8 +779,8 @@ tidyLearningCurve <- tidyLearningCurve %>%
     TRUE ~ "Data Error"
   )) %>%
   mutate(database = case_when(
-    database %in% c("cdm_optum_ehr") ~ "OPEHR",
-    database %in% c("cdm_optum_extended_ses") ~ "OPSES",
+    database %in% c("cdm_optum_ehr") ~ "Optum EHR",
+    database %in% c("cdm_optum_extended_ses") ~ "Clinformatics",
     TRUE ~ "Data Error"
   )) %>%
   mutate(Model = case_when(
