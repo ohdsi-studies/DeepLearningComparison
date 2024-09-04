@@ -251,12 +251,9 @@ library(scales)
 external_data <- complete_data %>%
   filter(database_meta_data_id != validation_database_meta_data_id)
 
-max_auroc <- max(external_data$AUROC, na.rm = TRUE)
-max_limit <- ceiling(max_auroc * 10) / 10
-
 p <- ggplot(external_data, aes(x = database_meta_data_id, y = AUROC)) +
   geom_boxplot() +
-  scale_y_continuous(limits = c(0.5, max_limit), breaks = seq(0.5, max_limit, by = 0.1)) +
+  geom_hline(yintercept = 0.5, linetype = "dashed", color = "gray") +  # Add dashed line at 0.5
   coord_flip() +
   theme_minimal() +
   theme(
@@ -265,7 +262,7 @@ p <- ggplot(external_data, aes(x = database_meta_data_id, y = AUROC)) +
     panel.grid.major.x = element_blank()
   ) +
   labs(x = "Development Database", y = "External AUROC") +
-  facet_grid(cohort_definition_id ~ model_type, scales = "free_y")
+  facet_grid(cohort_definition_id ~ model_type, scales = "free")
 
 ggsave("auroc-boxplots-grid.png", plot = p, dpi = 300)
 print(p)
