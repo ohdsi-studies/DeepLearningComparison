@@ -246,7 +246,6 @@ ggsave("heatmap.png", plot = p, width = 18, height = 12, dpi = 300)
 ```{r}
 library(ggplot2)
 library(dplyr)
-library(scales)
 
 external_data <- complete_data %>%
   filter(database_meta_data_id != validation_database_meta_data_id)
@@ -257,19 +256,15 @@ internal_data <- complete_data %>%
 nudge <- 0.18
 
 p <- ggplot() +
-  geom_boxplot(data = external_data, aes(x = as.factor(database_meta_data_id), y = AUROC), width = 0.3, position = position_nudge(x = -nudge), outlier.size = 1) +
-  geom_point(data = internal_data, aes(x = as.factor(database_meta_data_id), y = AUROC), color = "indianred1", size = 1, position = position_nudge(x = nudge)) +
-  geom_errorbar(data = internal_data, aes(x = as.factor(database_meta_data_id), width = 0.3, ymin = `95% lower AUROC`, ymax = `95% upper AUROC`), color = "indianred1", width = 0.2, position = position_nudge(x = nudge)) +
-  coord_flip() +
+    geom_boxplot(data = external_data, aes(y = as.factor(database_meta_data_id), x = AUROC, color = "External"), width = 0.3, position = position_nudge(y = -nudge), outlier.size = 1) +
+    geom_pointrange(data = internal_data, aes(y = as.factor(database_meta_data_id), x = AUROC, xmin = `95% lower AUROC`, xmax = `95% upper AUROC`, color = "Internal"), size = 0.1, position = position_nudge(y = nudge)) +
+  scale_color_manual(values = c("Internal" = "indianred1", "External" = "black"), limits = c("Internal", "External")) +
   theme_minimal() +
-  theme(
-    panel.grid.minor = element_blank(),
-    panel.grid.major.y = element_blank(),
-  ) +
-  labs(x = "Development database", y = "Validation performance (AUROC)") +
+  theme(panel.grid.minor = element_blank(), panel.grid.major.y = element_blank()) +
+  labs(y = "Development database", x = "Validation performance (AUROC)", color = "Validation") +
   facet_grid(cohort_definition_id ~ model_type, scales = "free")
 
-ggsave("auroc-boxplots-grid.png", plot = p, dpi = 300, height = 5, width = 9)
+ggsave("discrimination-summary.png", plot = p, dpi = 300, height = 5, width = 9)
 print(p)
 
 ```
