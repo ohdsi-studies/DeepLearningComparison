@@ -251,22 +251,26 @@ library(scales)
 external_data <- complete_data %>%
   filter(database_meta_data_id != validation_database_meta_data_id)
 
-p <- ggplot(external_data, aes(x = database_meta_data_id, y = AUROC)) +
-  geom_boxplot() +
-  geom_hline(yintercept = 0.5, linetype = "dashed", color = "gray") +  # Add dashed line at 0.5
+internal_data <- complete_data %>%
+  filter(database_meta_data_id == validation_database_meta_data_id)
+
+nudge <- 0.18
+
+p <- ggplot() +
+  geom_boxplot(data = external_data, aes(x = as.factor(database_meta_data_id), y = AUROC), width = 0.3, position = position_nudge(x = -nudge), outlier.size = 1) +
+  geom_point(data = internal_data, aes(x = as.factor(database_meta_data_id), y = AUROC), color = "indianred1", size = 1, position = position_nudge(x = nudge)) +
+  geom_errorbar(data = internal_data, aes(x = as.factor(database_meta_data_id), width = 0.3, ymin = `95% lower AUROC`, ymax = `95% upper AUROC`), color = "indianred1", width = 0.2, position = position_nudge(x = nudge)) +
   coord_flip() +
   theme_minimal() +
   theme(
-    axis.text.y = element_text(hjust = 1),
     panel.grid.minor = element_blank(),
-    panel.grid.major.x = element_blank()
+    panel.grid.major.y = element_blank(),
   ) +
-  labs(x = "Development Database", y = "External AUROC") +
+  labs(x = "Development database", y = "Validation performance (AUROC)") +
   facet_grid(cohort_definition_id ~ model_type, scales = "free")
 
-ggsave("auroc-boxplots-grid.png", plot = p, dpi = 300)
+ggsave("auroc-boxplots-grid.png", plot = p, dpi = 300, height = 5, width = 9)
 print(p)
-
 
 ```
 
